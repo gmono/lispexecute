@@ -88,6 +88,7 @@ namespace LispExecute
                 this.TopContainer.set(name,val);
             }
             let ret=obj.Calculate(func);
+            return this.ToRaw(ret);
         }
     }
 }

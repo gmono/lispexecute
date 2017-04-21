@@ -70,6 +70,7 @@ var LispExecute;
                 _this.TopContainer.set(name, val);
             };
             var ret = obj.Calculate(func);
+            return this.ToRaw(ret);
         };
         return Lisp;
     }());

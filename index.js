@@ -3,7 +3,7 @@ function display(str)
     let view=document.getElementById("viewport");
     view.innerHTML+=str+"\n";
 }
-
+let obj=new LispExecute.Lisp();
 window.onload=function()
 {
     let area=document.getElementById("inputarea");
@@ -14,7 +14,9 @@ window.onload=function()
         area.value="";
         if(str.trim()!="")
         {
-            display(str);
+            let table=LispExecute.Parser(str);
+            let res=obj.Run(table);
+            display(res);
         }
         
     }
