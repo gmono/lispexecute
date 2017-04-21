@@ -34,7 +34,27 @@ namespace LispExecute
          */
         protected static ReadValue(val:string):Table
         {
-
+            if(val[0]=='"')
+            {
+                //读取字符串
+                //切片去掉前后引号
+                let retstr=val.slice(1,val.length-1);
+                return new LispString(retstr);
+            }
+            else
+            {
+                let num=parseFloat(val);
+                if(isNaN(num))
+                {
+                    //此字面量为符号
+                    return new LispSymbolRefence(val);
+                }
+                else
+                {
+                    //此字面量为数字
+                    return new LispNumber(num);
+                }
+            }
         }
         /**
          * 解析代码的递归函数 约定：返回位置总是在此函数读取的最后一个字符后面
