@@ -13,6 +13,10 @@ var LispExecute;
     /**
      * 基本数据类型：表
      * 此表为通用表 特殊表可以有自己专属的方法 供装饰内部符号使用
+     * 此处明确一个概念 表这是一种通用数据结构
+     * 并不代表一个计算式 只有在Calculate函数中使用它时，才会被作为一个计算式
+     * 自然的 并不是每个表都确定一个环境，仅在Process调用时会创建一层新环境
+     * 表作为计算式计算时是由外部提供搜索符号的接口而非自己创建一个环境
      */
     var Table = (function () {
         function Table() {
@@ -21,10 +25,6 @@ var LispExecute;
             //此为表类型标注 正常表为normal
             //特殊表为自定义
             this.type = "normal";
-            /**
-             * 此为在内环境中找不到符号引用时对外请求搜索的回调函数
-             */
-            this.onSearchSymbol = null;
         }
         Table.prototype.Empty = function () {
             return this.childs.length == 0;
@@ -39,6 +39,7 @@ var LispExecute;
         /**
          * 计算这个表 特殊表直接返回自己或者进行内部操作后返回一个表
          * 复合表会计算后返回
+         * 以下过程说明 对于常规（复合）表而言 计算就是过程调用
          */
         Table.prototype.Calculate = function (circum) {
             if (this.childs == null || this.childs.length == 0)
@@ -50,8 +51,16 @@ var LispExecute;
             }
             var name = sym.name;
             //得到符号引用 找到符号实体 调用符号实体的Call
-            var func = circum.has(name) ? circum.get(name) : this.onSearchSymbol(name);
-            func.Call(this.childs.slice(1, this.childs.length));
+            var func = circum(name);
+            if (func.type == "process") {
+                //构造参数表
+                var pars = new Table();
+                pars.childs = this.childs.slice(1, this.childs.length);
+                //调用Process
+                return func.Call(circum, pars);
+            }
+            //如果不是process则错误
+            throw "错误，计算式必须引用一个过程";
         };
         return Table;
     }());
@@ -67,6 +76,9 @@ var LispExecute;
             _this.type = "number";
             return _this;
         }
+        LispNumber.prototype.Calculate = function (circum) {
+            return this;
+        };
         return LispNumber;
     }(Table));
     LispExecute.LispNumber = LispNumber;
@@ -81,6 +93,9 @@ var LispExecute;
             _this.type = "string";
             return _this;
         }
+        LispString.prototype.Calculate = function (circum) {
+            return this;
+        };
         return LispString;
     }(Table));
     LispExecute.LispString = LispString;
@@ -95,48 +110,114 @@ var LispExecute;
             _this.type = "symbol";
             return _this;
         }
+        /**
+         * 根据自身符号从环境中找到Table然后返回
+         * @param circum 环境
+         */
+        LispSymbolRefence.prototype.Calculate = function (circum) {
+            var ret = circum(this.name);
+            if (ret == null)
+                throw "符号引用错误！不存在这样的符号！";
+            return ret;
+        };
         return LispSymbolRefence;
     }(Table));
     LispExecute.LispSymbolRefence = LispSymbolRefence;
     /**
-     * 符号实体
-     * 符号有符号名和符号计算两个方法
-     * 这里的符号指的是符号的实体 而非引用
+     * 特殊表 过程 过程的结构为((name par1 par2.....)(body))
      */
-    var LispSymbol = (function () {
-        function LispSymbol(key, names, tar) {
-            this.Key = null;
-            this.Target = null;
-            this.Names = null;
-            this.Key = key;
-            this.Target = tar;
-            this.Names = names;
+    var LispProcess = (function (_super) {
+        __extends(LispProcess, _super);
+        function LispProcess(def) {
+            var _this = _super.call(this) || this;
+            _this.self = null;
+            _this.type = "process";
+            //保存过程定义
+            if (def == null || def.childs.length != 2)
+                throw "过程定义错误！";
+            _this.self = def;
+            return _this;
         }
-        /**
-         * 调用这个符号
-         * 使用传入的参数数组根据参数名数组
-         * @param pars 参数数组 也可以无参数
-         */
-        LispSymbol.prototype.Call = function (pars) {
-            if (pars != null && pars.length == this.Names.length) {
-                //有参数调用
-            }
-            else if ((pars == null || pars.length == 0) && this.Names == null) {
-                //无参数调用
-            }
+        Object.defineProperty(LispProcess.prototype, "Define", {
+            get: function () {
+                return this.self.childs[0];
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LispProcess.prototype, "ParsTable", {
+            get: function () {
+                //从定义表中取出参数表
+                var ret = this.self.childs[0].childs;
+                ret = ret.slice(1, ret.length);
+                var res = new Table();
+                res.childs = ret;
+                return res;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LispProcess.prototype, "Name", {
+            get: function () {
+                return this.self.childs[0].childs[0];
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LispProcess.prototype, "ParsCount", {
+            get: function () {
+                return this.self.childs[0].childs.length - 1;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(LispProcess.prototype, "Body", {
+            get: function () {
+                return this.self.childs[1];
+            },
+            enumerable: true,
+            configurable: true
+        });
+        LispProcess.prototype.Calculte = function (circum) {
+            throw "错误，不能直接计算Process表,应使用Call方法调用";
         };
-        return LispSymbol;
-    }());
-    LispExecute.LispSymbol = LispSymbol;
+        /**
+         * 此为过程调用
+         * 形式与普通的表计算有区别
+         * 这将创建一层新的环境
+         * @param circum 上层环境
+         * @param pars 参数表 取其childs对形参表做替换
+         */
+        LispProcess.prototype.Call = function (circum, pars) {
+            //构造此层搜索函数和环境
+            var thiscir = new Map();
+            var searfun = function (name) {
+                if (thiscir.has(name))
+                    return thiscir.get(name);
+                return circum(name);
+            };
+            //将参数加入环境
+            if (pars == null || pars.childs.length < this.ParsCount)
+                throw "错误！调用参数过少！";
+            for (var i = 0; i < this.self.childs.length; ++i) {
+                //加入环境
+                thiscir.set(this.ParsTable[i], pars[i]);
+            }
+            //使用新的环境搜索函数计算body表
+            return this.Body.Calculate(searfun);
+        };
+        return LispProcess;
+    }(Table));
+    LispExecute.LispProcess = LispProcess;
     /**
-     * 特殊表：预定义符号实体
+     * 特殊过程：原生过程
      */
-    var LispPreSymbol = (function (_super) {
-        __extends(LispPreSymbol, _super);
-        function LispPreSymbol(key, names) {
-            return _super.call(this, key, names, null) || this;
+    var LispPreProcess = (function (_super) {
+        __extends(LispPreProcess, _super);
+        function LispPreProcess() {
+            return _super.call(this, new Table) || this;
         }
-        return LispPreSymbol;
-    }(LispSymbol));
-    LispExecute.LispPreSymbol = LispPreSymbol;
+        return LispPreProcess;
+    }(LispProcess));
+    LispExecute.LispPreProcess = LispPreProcess;
 })(LispExecute || (LispExecute = {}));

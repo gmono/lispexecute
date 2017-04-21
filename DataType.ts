@@ -1,69 +1,106 @@
-namespace LispExecute
-{
-    export type Circumtance=Map<string,LispSymbol>;
+namespace LispExecute {
+    //符号搜索函数范式
+    //如果不提供后面的newval 则为获取值 返回搜索结果
+    //否则则为设置值 返回newval
+    export type SymbolFunc = (symbol: string, newval?: Table) => Table;
     /**
      * 基本数据类型：表
      * 此表为通用表 特殊表可以有自己专属的方法 供装饰内部符号使用
+     * 此处明确一个概念 表这是一种通用数据结构
+     * 并不代表一个计算式 只有在Calculate函数中使用它时，才会被作为一个计算式
+     * 自然的 并不是每个表都确定一个环境，仅在Process调用时会创建一层新环境
+     * 表作为计算式计算时是由外部提供搜索符号的接口而非自己创建一个环境
      */
     export class Table
     {
         //childs默认为空 即此表为空表 所有特殊表都为空表
-        public childs:Table[]=[];
+        public childs: Table[] = [];
         //此为表类型标注 正常表为normal
         //特殊表为自定义
-        protected type:string="normal";
-        public Empty():boolean
+        protected type: string = "normal";
+        public Empty(): boolean
         {
-            return this.childs.length==0;
+            return this.childs.length == 0;
         }
-        public get Type():string
+        public get Type(): string
         {
             return this.type;
         }
         /**
-         * 此为在内环境中找不到符号引用时对外请求搜索的回调函数
-         */
-        public onSearchSymbol:(symbol:string)=>LispSymbol=null;
-        /**
          * 计算这个表 特殊表直接返回自己或者进行内部操作后返回一个表
          * 复合表会计算后返回
+         * 以下过程说明 对于常规（复合）表而言 计算就是过程调用
          */
-        public Calculate(circum:Circumtance):Table
+        public Calculate(circum: SymbolFunc): Table
         {
-            if(this.childs==null||this.childs.length==0) return this;
+            if (this.childs == null || this.childs.length == 0) return this;
             //得到第一个子表 此表必须是一个符号引用
-            let sym:LispSymbolRefence=this.childs[0] as LispSymbolRefence;
-            if(sym.type!="symbol")
+            let sym: LispSymbolRefence = this.childs[0] as LispSymbolRefence;
+            if (sym.type != "symbol")
             {
-                throw "计算错误，计算表第一个元素必须是符号引用";
+                throw new Error("计算错误，计算表第一个元素必须是符号引用");
             }
-            let name=sym.name;
             //得到符号引用 找到符号实体 调用符号实体的Call
-            let func=circum.has(name)? circum.get(name):this.onSearchSymbol(name);
-            func.Call(this.childs.slice(1,this.childs.length));
+            let func: LispProcess = sym.Calculate(circum) as LispProcess;
+            if (func.type == "process")
+            {
+                //构造参数表
+                let pars = new Table();
+                pars.childs = this.childs.slice(1, this.childs.length);
+                //调用Process
+                return func.Call(circum, pars);
+            }
+            //如果不是process则错误
+            throw new Error("错误，计算式必须引用一个过程");
         }
 
     }
     /**
-     * 特殊表：数值
+     * 此为对数据对象的统一封装
+     * 计算为直接返回自己
      */
-    export class LispNumber extends Table
+    export class LispObject extends Table
     {
-        public constructor(public value:number)
+        //数据对象通用的保存数据的成员
+        public Object:any=null;
+        public constructor(value:any)
         {
             super();
-            this.type="number";
+            this.Object=value;
+        }
+        public Calculate(circum: SymbolFunc): Table
+        {
+            return this;
+        }
+    }
+    /**
+     * 特殊表：数值
+     */
+    export class LispNumber extends LispObject
+    {
+        public constructor(public value: number)
+        {
+            super(value);
+            this.type = "number";
+        }
+        public Calculate(circum: SymbolFunc): Table
+        {
+            return this;
         }
     }
     /**
      * 特殊表：字符串
      */
-    export class LispString extends Table
+    export class LispString extends LispObject
     {
-        public constructor(public value:string)
+        public constructor(public value: string)
         {
-            super();
-            this.type="string";
+            super(value);
+            this.type = "string";
+        }
+        public Calculate(circum: SymbolFunc): Table
+        {
+            return this;
         }
     }
     /**
@@ -71,54 +108,130 @@ namespace LispExecute
      */
     export class LispSymbolRefence extends Table
     {
-        public constructor(public name:string)
+        public constructor(public name: string)
         {
             super();
-            this.type="symbol";
-        }
-    }
-    /**
-     * 符号实体
-     * 符号有符号名和符号计算两个方法
-     * 这里的符号指的是符号的实体 而非引用
-     */
-    export class LispSymbol
-    {
-        public readonly Key:string=null;
-        public readonly Target:Table=null;
-        public readonly Names:string[]=null;
-        public constructor(key:string,names?:string[],tar?:Table)
-        {
-            this.Key=key;
-            this.Target=tar;
-            this.Names=names;
+            this.type = "symbol";
         }
         /**
-         * 调用这个符号
-         * 使用传入的参数数组根据参数名数组
-         * @param pars 参数数组 也可以无参数
+         * 根据自身符号从环境中找到Table然后返回
+         * @param circum 环境
          */
-        public Call(pars?:Table[]):Table
+        public Calculate(circum: SymbolFunc): Table
         {
-            if(pars!=null&&pars.length==this.Names.length)
-            {
-                //有参数调用
-            }
-            else if((pars==null||pars.length==0)&&this.Names==null)
-            {
-                //无参数调用
-            }
+            let ret = circum(this.name);
+            if (ret == null) throw new Error("符号引用错误！不存在这样的符号！");
+            return ret;
         }
-
+    }
+    export abstract class LispProcess extends Table
+    {
+         /**
+         * 此为过程调用
+         * 形式与普通的表计算有区别 
+         * 这将创建一层新的环境
+         * @param circum 上层环境
+         * @param pars 参数表 取其childs对形参表做替换
+         */
+        public Call(circum: SymbolFunc, pars: Table): Table
+        {
+             //构造此层搜索函数和环境
+            let thiscir = new Map<string, Table>();
+            let searfun = (name: string, newval?: Table) => {
+                if (newval == null)
+                {
+                    if (thiscir.has(name)) return thiscir.get(name);
+                    return circum(name);
+                }
+                //赋值
+                thiscir.set(name, newval);
+                return newval;
+            }
+            //交由Do函数处理
+            return this.Do(searfun, pars);
+        }
+        public abstract Do(circum: SymbolFunc, pars: Table): Table;
+        public abstract get Name(): string;
     }
     /**
-     * 特殊表：预定义符号实体
+     * 定义过程 过程的表结构为((name par1 par2.....)(body))
      */
-    export class LispPreSymbol extends LispSymbol
+    export class LispDefProcess extends LispProcess
     {
-        public constructor(key:string,names?:string[])
+        public self: Table = null;
+        public constructor(def: Table)
         {
-            super(key,names,null);
+            super();
+            this.type = "process";
+            //保存过程定义
+            if (def == null || def.childs.length != 2) throw new Error("过程定义错误！");
+            this.self = def;
         }
+        public get Define(): Table
+        {
+            return this.self.childs[0];
+        }
+        public get ParsTable(): Table
+        {
+            //从定义表中取出参数表
+            let ret = this.self.childs[0].childs;
+            ret = ret.slice(1, ret.length);
+            let res = new Table();
+            res.childs = ret;
+            return res;
+        }
+        public get Name(): string
+        {
+            let t = this.self.childs[0].childs[0] as LispSymbolRefence;
+            return t.name;
+        }
+        public get ParsCount()
+        {
+            return this.self.childs[0].childs.length - 1;
+        }
+        public get Body()
+        {
+            return this.self.childs[1];
+        }
+        public Calculte(circum: SymbolFunc): Table
+        {
+            throw new Error("错误，不能直接计算Process表,应使用Call方法调用");
+        }
+        /**
+         * 此为定义过程调用 将以新环境计算body表
+         * @param circum 新环境通信函数
+         * @param pars 参数表 取其childs对形参表做替换
+         */
+        public Do(circum: SymbolFunc, pars: Table): Table
+        {
+            //将参数加入环境
+            if (pars == null || pars.childs.length < this.ParsCount) throw "错误！调用参数过少！";
+            for (let i = 0; i < this.self.childs.length; ++i)
+            {
+                //加入环境
+                circum(this.ParsTable[i], pars[i]);
+            }
+            //使用新的环境搜索函数计算body表
+            return this.Body.Calculate(circum);
+        }
+    }
+    /**
+     * 特殊过程：原生过程
+     * 此类接收一个函数 并代表这个函数
+     * 一般来说只有对函数进行简单封装时才使用这个类
+     */
+    export class LispRawProcess extends LispProcess
+    {
+            public Do(circum: SymbolFunc, pars: Table): Table
+            {
+                //构建搜索中间域
+                return this.rawFunc(circum, pars);
+            }
+
+        public constructor(public Name: string, public rawFunc: Function)
+        {
+            super();
+        }
+        
     }
 }
