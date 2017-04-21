@@ -116,9 +116,30 @@ namespace LispExecute
                 }
                 return true;
             }});
+            this.SetSymbol(<SymPair>{key:'do',isneedcircum:true,callthis:null,isneedcal:false,val:(circum:SymbolFunc,...args)=>{
+                //此过程对接收的每个参数求值 后返回最后一个求值的结果
+                //此过程用于将多个Table联合在一起作为一个Table求值
+                let ret:Table;
+                for(let a  of args)
+                {
+                    ret=(<Table>a).Calculate(circum);
+                }
+                return ret.Calculate(circum);
+            }});
             this.SetSymbol(<SymPair>{key:'define',isneedcircum:true,callthis:null,isneedcal:false,val:(circum:SymbolFunc,...args)=>{
-                console.log(circum);
-                console.log(args);
+                //这里来构造一个process
+                //先构造body
+                let bodylist=args.slice(1,args.length);//得到body序列
+                //合成一个body
+                let body=new Table();
+                body.childs.push(new LispSymbolRefence("do"));//使用do操作符连接多个table
+                body.childs=body.childs.concat(bodylist);
+                let def=new Table();
+                def.childs[0]=args[0];
+                def.childs[1]=body;
+                let proc=new LispDefProcess(def);
+                //加入环境
+                circum(proc.Name,proc);
             }});
         }
         public constructor(initstate?:SymPair[])

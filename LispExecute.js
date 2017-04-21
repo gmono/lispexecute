@@ -154,13 +154,38 @@ var LispExecute;
                     }
                     return true;
                 } });
+            this.SetSymbol({ key: 'do', isneedcircum: true, callthis: null, isneedcal: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    //此过程对接收的每个参数求值 后返回最后一个求值的结果
+                    //此过程用于将多个Table联合在一起作为一个Table求值
+                    var ret;
+                    for (var _a = 0, args_2 = args; _a < args_2.length; _a++) {
+                        var a = args_2[_a];
+                        ret = a.Calculate(circum);
+                    }
+                    return ret.Calculate(circum);
+                } });
             this.SetSymbol({ key: 'define', isneedcircum: true, callthis: null, isneedcal: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
                     }
-                    console.log(circum);
-                    console.log(args);
+                    //这里来构造一个process
+                    //先构造body
+                    var bodylist = args.slice(1, args.length); //得到body序列
+                    //合成一个body
+                    var body = new LispExecute.Table();
+                    body.childs.push(new LispExecute.LispSymbolRefence("do")); //使用do操作符连接多个table
+                    body.childs = body.childs.concat(bodylist);
+                    var def = new LispExecute.Table();
+                    def.childs[0] = args[0];
+                    def.childs[1] = body;
+                    var proc = new LispExecute.LispDefProcess(def);
+                    //加入环境
+                    circum(proc.Name, proc);
                 } });
         };
         /**

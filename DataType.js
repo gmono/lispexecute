@@ -115,29 +115,6 @@ var LispExecute;
         function LispProcess() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        /**
-        * 此为过程调用
-        * 形式与普通的表计算有区别
-        * 这将创建一层新的环境
-        * @param circum 上层环境
-        * @param pars 参数表 取其childs对形参表做替换
-        */
-        LispProcess.prototype.Call = function (circum, pars) {
-            //构造此层搜索函数和环境
-            var thiscir = new Map();
-            var searfun = function (name, newval) {
-                if (newval == null) {
-                    if (thiscir.has(name))
-                        return thiscir.get(name);
-                    return circum(name);
-                }
-                //赋值
-                thiscir.set(name, newval);
-                return newval;
-            };
-            //交由Do函数处理
-            return this.Do(searfun, pars);
-        };
         return LispProcess;
     }(Table));
     LispExecute.LispProcess = LispProcess;
@@ -153,6 +130,13 @@ var LispExecute;
             //保存过程定义
             if (def == null || def.childs.length != 2)
                 throw new Error("过程定义错误！");
+            //检测参数表
+            for (var _i = 0, _a = def.childs[0].childs; _i < _a.length; _i++) {
+                var a = _a[_i];
+                if (!(a instanceof LispSymbolRefence)) {
+                    throw new Error("错误！过程声明中必须全为SymbolRefence");
+                }
+            }
             _this.self = def;
             return _this;
         }
@@ -201,22 +185,36 @@ var LispExecute;
             throw new Error("错误，不能直接计算Process表,应使用Call方法调用");
         };
         /**
-         * 此为定义过程调用 将以新环境计算body表
-         * @param circum 新环境通信函数
-         * @param pars 参数表 取其childs对形参表做替换
-         */
-        LispDefProcess.prototype.Do = function (circum, pars) {
+        * 此为过程调用
+        * 形式与普通的表计算有区别
+        * 这将创建一层新的环境
+        * @param circum 上层环境
+        * @param pars 参数表 取其childs对形参表做替换
+        */
+        LispDefProcess.prototype.Call = function (circum, pars) {
+            //构造此层搜索函数和环境
+            var thiscir = new Map();
+            var searfun = function (name, newval) {
+                if (newval == null) {
+                    if (thiscir.has(name))
+                        return thiscir.get(name);
+                    return circum(name);
+                }
+                //赋值
+                thiscir.set(name, newval);
+                return newval;
+            };
             //将参数加入环境
             if (pars == null || pars.childs.length < this.ParsCount)
                 throw "错误！调用参数过少！";
-            for (var i = 0; i < this.self.childs.length; ++i) {
+            for (var i = 0; i < this.ParsTable.childs.length; ++i) {
                 //计算每个参数
                 var res = pars.childs[i].Calculate(circum);
                 //加入环境
-                circum(this.ParsTable[i], res);
+                searfun(this.ParsTable.childs[i].name, res);
             }
             //使用新的环境搜索函数计算body表
-            return this.Body.Calculate(circum);
+            return this.Body.Calculate(searfun);
         };
         return LispDefProcess;
     }(LispProcess));
@@ -247,7 +245,7 @@ var LispExecute;
             _this.type = "process";
             return _this;
         }
-        LispRawProcess.prototype.Do = function (circum, pars) {
+        LispRawProcess.prototype.Call = function (circum, pars) {
             //转换参数
             var rarr = [];
             if (this.IsNeedCircum)
