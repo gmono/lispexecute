@@ -36,7 +36,7 @@ namespace LispExecute
             }});
             //乘法可以用于重复语义和数字
             this.SetSymbol(<SymPair>{key:'*',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
-                   let sum=typeof args[0]=="number" ? 0:args[0];
+                   let sum=args[0];
                    //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
                    if(typeof sum=="string")
                    {
@@ -70,13 +70,55 @@ namespace LispExecute
                 }
                 return sum;
             }});
+            //比较操作部分
             this.SetSymbol(<SymPair>{key:'>',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
-                let sum=args[0];
+                let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
-                    sum/=t;
+                    if(!(old>t)) return false;
+                    old=t;
                 }
-                return sum;
+                return true;
+            }});
+            this.SetSymbol(<SymPair>{key:'<',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                let old=args[0];
+                for(let t of args.slice(1,args.length))
+                {
+                    if(!(old<t)) return false;
+                    old=t;
+                }
+                return true;
+            }});
+            this.SetSymbol(<SymPair>{key:'=',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                let old=args[0];
+                for(let t of args.slice(1,args.length))
+                {
+                    if(!(old==t)) return false;
+                    old=t;
+                }
+                return true;
+            }});
+            this.SetSymbol(<SymPair>{key:'>=',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                let old=args[0];
+                for(let t of args.slice(1,args.length))
+                {
+                    if(!(old>=t)) return false;
+                    old=t;
+                }
+                return true;
+            }});
+            this.SetSymbol(<SymPair>{key:'<=',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                let old=args[0];
+                for(let t of args.slice(1,args.length))
+                {
+                    if(!(old<=t)) return false;
+                    old=t;
+                }
+                return true;
+            }});
+            this.SetSymbol(<SymPair>{key:'define',isneedcircum:true,callthis:null,isneedcal:false,val:(circum:SymbolFunc,...args)=>{
+                console.log(circum);
+                console.log(args);
             }});
         }
         public constructor(initstate?:SymPair[])

@@ -74,7 +74,6 @@ var LispExecute;
             var _this = _super.call(this) || this;
             //数据对象通用的保存数据的成员
             _this.Object = null;
-            _this.ObjectType = "object";
             _this.Object = value;
             _this.type = "object";
             return _this;
@@ -255,8 +254,8 @@ var LispExecute;
                 rarr.push(circum);
             for (var _i = 0, _a = pars.childs; _i < _a.length; _i++) {
                 var v = _a[_i];
-                //计算
-                var vobj = v.Calculate(circum);
+                //根据是否需要计算的标记 选择计算还是保持原值(原表结构)
+                var vobj = this.IsNeedCal ? v.Calculate(circum) : v;
                 //这里处理所有的数据对象 而不管它是什么对象
                 if (vobj.Type == "object") {
                     var t = vobj;

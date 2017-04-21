@@ -63,7 +63,6 @@ namespace LispExecute {
     {
         //数据对象通用的保存数据的成员
         public Object:any=null;
-        public ObjectType="object";
         public constructor(value:any)
         {
             super();
@@ -205,8 +204,8 @@ namespace LispExecute {
                 if(this.IsNeedCircum) rarr.push(circum);
                 for(let v of pars.childs)
                 {
-                    //计算
-                    let vobj=v.Calculate(circum);
+                    //根据是否需要计算的标记 选择计算还是保持原值(原表结构)
+                    let vobj=this.IsNeedCal?v.Calculate(circum):v;
                     //这里处理所有的数据对象 而不管它是什么对象
                     if(vobj.Type=="object")
                     {
