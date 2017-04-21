@@ -265,14 +265,14 @@ var LispExecute;
         __extends(LispRawProcess, _super);
         /**
          *
-         * @param Name 此过程的名字
+         * @param Name 此过程的名字 与环境无关 仅仅作为一个属性
          * @param rawFunc 封装的原生函数
          * @param IsNeedCircum 是否需要第一个参数传circum回调函数
          */
         function LispRawProcess(Name, rawFunc, IsNeedCircum, CallThis, IsNeedCal) {
             if (IsNeedCircum === void 0) { IsNeedCircum = false; }
             if (CallThis === void 0) { CallThis = null; }
-            if (IsNeedCal === void 0) { IsNeedCal = false; }
+            if (IsNeedCal === void 0) { IsNeedCal = true; }
             var _this = _super.call(this) || this;
             _this.Name = Name;
             _this.rawFunc = rawFunc;
@@ -301,7 +301,21 @@ var LispExecute;
                 rarr.push(vobj);
             }
             //调用
-            return this.rawFunc.apply(this.CallThis, rarr);
+            var ret = this.rawFunc.apply(this.CallThis, rarr);
+            if (ret instanceof Table)
+                return ret;
+            switch (typeof ret) {
+                case "string":
+                    return new LispNumber(ret);
+                case "number":
+                    return new LispString(ret);
+                case "function":
+                    return new LispRawProcess("", ret);
+                default:
+                    return new LispObject(ret);
+            }
+            //注意这里处理函数的方法
+            //采用默认参数 也就是this对象为null不提供环境 先计算参数(应用序 常规过程调用模式)
         };
         return LispRawProcess;
     }(LispProcess));

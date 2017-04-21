@@ -46,7 +46,7 @@ var LispExecute;
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
                     }
-                    var sum = typeof args[0] == "number" ? 0 : "";
+                    var sum = typeof args[0] == "number" ? 0 : args[0];
                     //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
                     if (typeof sum == "string") {
                         //重复语义
@@ -69,6 +69,18 @@ var LispExecute;
                     }
                     else
                         return null;
+                    return sum;
+                } });
+            this.SetSymbol({ key: '/', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var sum = args[0];
+                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                        var t = _b[_a];
+                        sum /= t;
+                    }
                     return sum;
                 } });
         };

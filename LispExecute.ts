@@ -35,8 +35,8 @@ namespace LispExecute
                 return sum;
             }});
             //乘法可以用于重复语义和数字
-               this.SetSymbol(<SymPair>{key:'*',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
-                   let sum=typeof args[0]=="number" ? 0:"";
+            this.SetSymbol(<SymPair>{key:'*',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                   let sum=typeof args[0]=="number" ? 0:args[0];
                    //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
                    if(typeof sum=="string")
                    {
@@ -62,6 +62,14 @@ namespace LispExecute
                    else return null;
                    return sum;
                }});
+            this.SetSymbol(<SymPair>{key:'/',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                let sum=args[0];
+                for(let t of args.slice(1,args.length))
+                {
+                    sum/=t;
+                }
+                return sum;
+            }});
         }
         public constructor(initstate?:SymPair[])
         {

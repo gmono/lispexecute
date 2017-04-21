@@ -248,15 +248,29 @@ namespace LispExecute {
                     rarr.push(vobj);
                 }
                 //调用
-                return this.rawFunc.apply(this.CallThis,rarr);
+                let ret= this.rawFunc.apply(this.CallThis,rarr);
+                if(ret instanceof Table) return ret;
+                switch(typeof ret)
+                {
+                    case "string":
+                    return new LispNumber(ret);
+                    case "number":
+                    return new LispString(ret);
+                    case "function":
+                    return new LispRawProcess("",ret);
+                    default:
+                    return new LispObject(ret);
+                }
+                //注意这里处理函数的方法
+                //采用默认参数 也就是this对象为null不提供环境 先计算参数(应用序 常规过程调用模式)
             }
         /**
          * 
-         * @param Name 此过程的名字
+         * @param Name 此过程的名字 与环境无关 仅仅作为一个属性
          * @param rawFunc 封装的原生函数
          * @param IsNeedCircum 是否需要第一个参数传circum回调函数
          */
-        public constructor(public Name: string, public rawFunc: Function,public IsNeedCircum:boolean=false,public CallThis:any=null,public IsNeedCal=false)
+        public constructor(public Name: string, public rawFunc: Function,public IsNeedCircum:boolean=false,public CallThis:any=null,public IsNeedCal=true)
         {
             super();
             this.type="process";
