@@ -63,10 +63,12 @@ namespace LispExecute {
     {
         //数据对象通用的保存数据的成员
         public Object:any=null;
+        public ObjectType="object";
         public constructor(value:any)
         {
             super();
             this.Object=value;
+            this.type="object";
         }
         public Calculate(circum: SymbolFunc): Table
         {
@@ -81,7 +83,7 @@ namespace LispExecute {
         public constructor(public value: number)
         {
             super(value);
-            this.type = "number";
+            this.ObjectType="number";
         }
         public Calculate(circum: SymbolFunc): Table
         {
@@ -96,7 +98,7 @@ namespace LispExecute {
         public constructor(public value: string)
         {
             super(value);
-            this.type = "string";
+            this.ObjectType="string";
         }
         public Calculate(circum: SymbolFunc): Table
         {
@@ -105,6 +107,8 @@ namespace LispExecute {
     }
     /**
      * 符号引用
+     * 此处可以在Calculate函数中进行特殊处理
+     * 这样来将一个符号关联到某个js对象的成员集合中
      */
     export class LispSymbolRefence extends Table
     {
@@ -224,11 +228,31 @@ namespace LispExecute {
     {
             public Do(circum: SymbolFunc, pars: Table): Table
             {
-                //构建搜索中间域
-                return this.rawFunc(circum, pars);
+                //转换参数
+                let rarr=[];
+                if(this.IsNeedCircum) rarr.push(circum);
+                for(let v of pars.childs)
+                {
+                    //这里处理所有的数据对象 而不管它是什么对象
+                    if(v.Type=="object")
+                    {
+                        let t:LispObject=v as LispObject;
+                        rarr.push(t.Object);
+                        continue;
+                    }
+                    //对于非数据对象 就只能传原始值了
+                    rarr.push(v);
+                }
+                //调用
+                return this.rawFunc.apply(this.CallThis,rarr);
             }
-
-        public constructor(public Name: string, public rawFunc: Function)
+        /**
+         * 
+         * @param Name 此过程的名字
+         * @param rawFunc 封装的原生函数
+         * @param IsNeedCircum 是否需要第一个参数传circum回调函数
+         */
+        public constructor(public Name: string, public rawFunc: Function,public IsNeedCircum:boolean=false,public CallThis:any=null)
         {
             super();
         }
