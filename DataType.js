@@ -269,14 +269,16 @@ var LispExecute;
          * @param rawFunc 封装的原生函数
          * @param IsNeedCircum 是否需要第一个参数传circum回调函数
          */
-        function LispRawProcess(Name, rawFunc, IsNeedCircum, CallThis) {
+        function LispRawProcess(Name, rawFunc, IsNeedCircum, CallThis, IsNeedCal) {
             if (IsNeedCircum === void 0) { IsNeedCircum = false; }
             if (CallThis === void 0) { CallThis = null; }
+            if (IsNeedCal === void 0) { IsNeedCal = false; }
             var _this = _super.call(this) || this;
             _this.Name = Name;
             _this.rawFunc = rawFunc;
             _this.IsNeedCircum = IsNeedCircum;
             _this.CallThis = CallThis;
+            _this.IsNeedCal = IsNeedCal;
             _this.type = "process";
             return _this;
         }

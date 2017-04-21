@@ -256,7 +256,7 @@ namespace LispExecute {
          * @param rawFunc 封装的原生函数
          * @param IsNeedCircum 是否需要第一个参数传circum回调函数
          */
-        public constructor(public Name: string, public rawFunc: Function,public IsNeedCircum:boolean=false,public CallThis:any=null)
+        public constructor(public Name: string, public rawFunc: Function,public IsNeedCircum:boolean=false,public CallThis:any=null,public IsNeedCal=false)
         {
             super();
             this.type="process";

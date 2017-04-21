@@ -15,7 +15,7 @@ var LispExecute;
                 }
         }
         Lisp.prototype.AddPreSymbols = function () {
-            this.SetSymbol({ key: '+', isneedcircum: false, callthis: null, val: function () {
+            this.SetSymbol({ key: '+', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -27,7 +27,8 @@ var LispExecute;
                     }
                     return sum;
                 } });
-            this.SetSymbol({ key: '-', isneedcircum: false, callthis: null, val: function () {
+            //减法只能用于数字
+            this.SetSymbol({ key: '-', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -39,7 +40,37 @@ var LispExecute;
                     }
                     return sum;
                 } });
-            this.SetSymbol({ key: 'alert', isneedcircum: false, callthis: null, val: alert });
+            //乘法可以用于重复语义和数字
+            this.SetSymbol({ key: '*', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var sum = typeof args[0] == "number" ? 0 : "";
+                    //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
+                    if (typeof sum == "string") {
+                        //重复语义
+                        var nowblock = sum;
+                        for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                            var a = _b[_a];
+                            if (typeof a != "number")
+                                throw new Error("错误！重复语义乘法除第一个参数外必须都为Number型!");
+                            for (var i = 0; i < a; ++i) {
+                                sum += nowblock;
+                            }
+                            nowblock = sum;
+                        }
+                    }
+                    else if (typeof sum == "number") {
+                        for (var _c = 0, _d = args.slice(1, args.length); _c < _d.length; _c++) {
+                            var a = _d[_c];
+                            sum *= a;
+                        }
+                    }
+                    else
+                        return null;
+                    return sum;
+                } });
         };
         /**
          * 设置一个符号 可以覆盖
@@ -83,7 +114,7 @@ var LispExecute;
             else if (typeof sym.val == "function") {
                 //封装函数
                 var fun = sym.val;
-                var func = new LispExecute.LispRawProcess(fun.name, fun, sym.isneedcircum, sym.callthis);
+                var func = new LispExecute.LispRawProcess(fun.name, fun, sym.isneedcircum, sym.callthis, sym.isneedcal);
                 return func;
             }
             else {
