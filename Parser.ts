@@ -47,7 +47,7 @@ namespace LispExecute
                 //读取字符串
                 //切片去掉前后引号
                 let retstr=val.slice(1,val.length-1);
-                return new LispString(retstr);
+                return new LispObject(retstr);
             }
             else
             {
@@ -60,7 +60,7 @@ namespace LispExecute
                 else
                 {
                     //此字面量为数字
-                    return new LispNumber(num);
+                    return new LispObject(num);
                 }
             }
         }

@@ -83,6 +83,18 @@ var LispExecute;
                     }
                     return sum;
                 } });
+            this.SetSymbol({ key: '>', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var sum = args[0];
+                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                        var t = _b[_a];
+                        sum /= t;
+                    }
+                    return sum;
+                } });
         };
         /**
          * 设置一个符号 可以覆盖

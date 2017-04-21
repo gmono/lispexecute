@@ -86,40 +86,6 @@ var LispExecute;
     }(Table));
     LispExecute.LispObject = LispObject;
     /**
-     * 特殊表：数值
-     */
-    var LispNumber = (function (_super) {
-        __extends(LispNumber, _super);
-        function LispNumber(value) {
-            var _this = _super.call(this, value) || this;
-            _this.value = value;
-            _this.ObjectType = "number";
-            return _this;
-        }
-        LispNumber.prototype.Calculate = function (circum) {
-            return this;
-        };
-        return LispNumber;
-    }(LispObject));
-    LispExecute.LispNumber = LispNumber;
-    /**
-     * 特殊表：字符串
-     */
-    var LispString = (function (_super) {
-        __extends(LispString, _super);
-        function LispString(value) {
-            var _this = _super.call(this, value) || this;
-            _this.value = value;
-            _this.ObjectType = "string";
-            return _this;
-        }
-        LispString.prototype.Calculate = function (circum) {
-            return this;
-        };
-        return LispString;
-    }(LispObject));
-    LispExecute.LispString = LispString;
-    /**
      * 符号引用
      * 此处可以在Calculate函数中进行特殊处理
      * 这样来将一个符号关联到某个js对象的成员集合中
@@ -305,10 +271,6 @@ var LispExecute;
             if (ret instanceof Table)
                 return ret;
             switch (typeof ret) {
-                case "string":
-                    return new LispNumber(ret);
-                case "number":
-                    return new LispString(ret);
                 case "function":
                     return new LispRawProcess("", ret);
                 default:

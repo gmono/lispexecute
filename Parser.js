@@ -36,7 +36,7 @@ var LispExecute;
                 //读取字符串
                 //切片去掉前后引号
                 var retstr = val.slice(1, val.length - 1);
-                return new LispExecute.LispString(retstr);
+                return new LispExecute.LispObject(retstr);
             }
             else {
                 var num = parseFloat(val);
@@ -46,7 +46,7 @@ var LispExecute;
                 }
                 else {
                     //此字面量为数字
-                    return new LispExecute.LispNumber(num);
+                    return new LispExecute.LispObject(num);
                 }
             }
         };

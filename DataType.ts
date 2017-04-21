@@ -76,36 +76,6 @@ namespace LispExecute {
         }
     }
     /**
-     * 特殊表：数值
-     */
-    export class LispNumber extends LispObject
-    {
-        public constructor(public value: number)
-        {
-            super(value);
-            this.ObjectType="number";
-        }
-        public Calculate(circum: SymbolFunc): Table
-        {
-            return this;
-        }
-    }
-    /**
-     * 特殊表：字符串
-     */
-    export class LispString extends LispObject
-    {
-        public constructor(public value: string)
-        {
-            super(value);
-            this.ObjectType="string";
-        }
-        public Calculate(circum: SymbolFunc): Table
-        {
-            return this;
-        }
-    }
-    /**
      * 符号引用
      * 此处可以在Calculate函数中进行特殊处理
      * 这样来将一个符号关联到某个js对象的成员集合中
@@ -252,10 +222,6 @@ namespace LispExecute {
                 if(ret instanceof Table) return ret;
                 switch(typeof ret)
                 {
-                    case "string":
-                    return new LispNumber(ret);
-                    case "number":
-                    return new LispString(ret);
                     case "function":
                     return new LispRawProcess("",ret);
                     default:

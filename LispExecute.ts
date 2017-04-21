@@ -70,6 +70,14 @@ namespace LispExecute
                 }
                 return sum;
             }});
+            this.SetSymbol(<SymPair>{key:'>',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                let sum=args[0];
+                for(let t of args.slice(1,args.length))
+                {
+                    sum/=t;
+                }
+                return sum;
+            }});
         }
         public constructor(initstate?:SymPair[])
         {
