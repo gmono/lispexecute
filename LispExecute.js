@@ -7,24 +7,40 @@ var LispExecute;
         function Lisp(initstate) {
             this.TopContainer = new Map();
             //先加入预定义符号 加减乘除等
-            this.SetSymbol({ key: '+', isneedcircum: false, callthis: null, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var sum = 0;
-                    for (var _a = 0, args_1 = args; _a < args_1.length; _a++) {
-                        var t = args_1[_a];
-                        sum += t;
-                    }
-                    return sum;
-                } });
+            this.AddPreSymbols();
             if (initstate != null)
                 for (var _i = 0, initstate_1 = initstate; _i < initstate_1.length; _i++) {
                     var t = initstate_1[_i];
                     this.SetSymbol(t);
                 }
         }
+        Lisp.prototype.AddPreSymbols = function () {
+            this.SetSymbol({ key: '+', isneedcircum: false, callthis: null, val: function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var sum = typeof args[0] == "number" ? 0 : "";
+                    for (var _a = 0, args_1 = args; _a < args_1.length; _a++) {
+                        var t = args_1[_a];
+                        sum += t;
+                    }
+                    return sum;
+                } });
+            this.SetSymbol({ key: '-', isneedcircum: false, callthis: null, val: function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var sum = args[0];
+                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                        var t = _b[_a];
+                        sum -= t;
+                    }
+                    return sum;
+                } });
+            this.SetSymbol({ key: 'alert', isneedcircum: false, callthis: null, val: alert });
+        };
         /**
          * 设置一个符号 可以覆盖
          * @param sym 符号

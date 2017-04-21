@@ -14,17 +14,30 @@ namespace LispExecute
     export class Lisp
     {
         public TopContainer:Map<string,Table>=new Map<string,Table>();
-        public constructor(initstate?:SymPair[])
+        protected AddPreSymbols()
         {
-            //先加入预定义符号 加减乘除等
             this.SetSymbol(<SymPair>{key:'+',isneedcircum:false,callthis:null,val:(...args)=>{
-                let sum=0;
+                let sum=typeof args[0] =="number"? 0:"";
                 for(let t of args)
                 {
                     sum+=t;
                 }
                 return sum;
             }});
+            this.SetSymbol(<SymPair>{key:'-',isneedcircum:false,callthis:null,val:(...args)=>{
+                let sum=args[0];
+                for(let t of args.slice(1,args.length))
+                {
+                    sum-=t;
+                }
+                return sum;
+            }});
+               this.SetSymbol(<SymPair>{key:'alert',isneedcircum:false,callthis:null,val:alert});
+        }
+        public constructor(initstate?:SymPair[])
+        {
+            //先加入预定义符号 加减乘除等
+            this.AddPreSymbols();
             if(initstate!=null) for(let t of initstate)
             {
                 this.SetSymbol(t);
