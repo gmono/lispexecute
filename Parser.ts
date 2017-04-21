@@ -22,9 +22,17 @@ namespace LispExecute
             for(;nowptr<code.length&&(code[nowptr]==' '||code[nowptr]=='\t');++nowptr);
             //这里应该指向code的末尾或者第一个非空字符
             //如果这个非空字符不是表的开始 就返回空
-            if(code.length==nowptr||code[nowptr]!='(') return null;
+            if(code.length==nowptr)
+            {
+                return null;
+            }
+            else if(code[nowptr]!='(')
+            {
+                //认为是单纯的 值
+                return this.ReadValue(code);
+            }
             nowptr++;//指向括号后面
-           let ret=this.ParseCode(code,0);
+           let ret=this.ParseCode(code,nowptr);
            if(ret==null) return null;
            return ret.obj;
         }

@@ -255,6 +255,7 @@ namespace LispExecute {
         public constructor(public Name: string, public rawFunc: Function,public IsNeedCircum:boolean=false,public CallThis:any=null)
         {
             super();
+            this.type="process";
         }
         
     }

@@ -6,6 +6,19 @@ var LispExecute;
     var Lisp = (function () {
         function Lisp(initstate) {
             this.TopContainer = new Map();
+            //先加入预定义符号 加减乘除等
+            this.SetSymbol({ key: '+', isneedcircum: false, callthis: null, val: function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var sum = 0;
+                    for (var _a = 0, args_1 = args; _a < args_1.length; _a++) {
+                        var t = args_1[_a];
+                        sum += t;
+                    }
+                    return sum;
+                } });
             if (initstate != null)
                 for (var _i = 0, initstate_1 = initstate; _i < initstate_1.length; _i++) {
                     var t = initstate_1[_i];
@@ -76,3 +89,4 @@ var LispExecute;
     }());
     LispExecute.Lisp = Lisp;
 })(LispExecute || (LispExecute = {}));
+//# sourceMappingURL=LispExecute.js.map

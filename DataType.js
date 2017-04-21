@@ -275,6 +275,7 @@ var LispExecute;
             _this.rawFunc = rawFunc;
             _this.IsNeedCircum = IsNeedCircum;
             _this.CallThis = CallThis;
+            _this.type = "process";
             return _this;
         }
         LispRawProcess.prototype.Do = function (circum, pars) {
@@ -300,3 +301,4 @@ var LispExecute;
     }(LispProcess));
     LispExecute.LispRawProcess = LispRawProcess;
 })(LispExecute || (LispExecute = {}));
+//# sourceMappingURL=DataType.js.map

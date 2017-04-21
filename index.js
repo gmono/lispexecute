@@ -1,6 +1,11 @@
-function display(str)
+function displayres(str)
 {
     let view=document.getElementById("viewport");
+    view.innerHTML+=str+"\n";
+}
+function displaycom(str)
+{
+        let view=document.getElementById("command");
     view.innerHTML+=str+"\n";
 }
 let obj=new LispExecute.Lisp();
@@ -14,9 +19,10 @@ window.onload=function()
         area.value="";
         if(str.trim()!="")
         {
-            let table=LispExecute.Parser(str);
+            displaycom(str);
+            let table=LispExecute.Parser.Parse(str);
             let res=obj.Run(table);
-            display(res);
+            displayres("> "+res);
         }
         
     }

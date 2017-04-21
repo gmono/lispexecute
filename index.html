@@ -15,12 +15,10 @@
             margin: 0;
             padding: 0;
         }
-        #viewport{
+        #viewport,#command{
             height: 500px;
             max-height: 500px;
-            max-width: 100%;
-            display: block;
-            width: 100%;
+            flex: 1;
         }
         #inputarea
         {
@@ -31,7 +29,11 @@
     </style>
 </head>
 <body>
-    <textarea id="viewport" readonly></textarea>
+    <div style="display:flex">
+            <textarea id="viewport" readonly></textarea>
+    <textarea id="command" readonly></textarea>
+    </div>
+
     <input type="text" id="inputarea">
     
 </body>

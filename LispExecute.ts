@@ -16,7 +16,15 @@ namespace LispExecute
         public TopContainer:Map<string,Table>=new Map<string,Table>();
         public constructor(initstate?:SymPair[])
         {
-
+            //先加入预定义符号 加减乘除等
+            this.SetSymbol(<SymPair>{key:'+',isneedcircum:false,callthis:null,val:(...args)=>{
+                let sum=0;
+                for(let t of args)
+                {
+                    sum+=t;
+                }
+                return sum;
+            }});
             if(initstate!=null) for(let t of initstate)
             {
                 this.SetSymbol(t);
