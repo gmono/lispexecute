@@ -204,16 +204,21 @@ namespace LispExecute {
                 for(let v of pars.childs)
                 {
                     //根据是否需要计算的标记 选择计算还是保持原值(原表结构)
-                    let vobj=this.IsNeedCal?v.Calculate(circum):v;
-                    //这里处理所有的数据对象 而不管它是什么对象
-                    if(vobj.Type=="object")
+                    if(this.IsNeedCal)
                     {
-                        let t:LispObject=vobj as LispObject;
-                        rarr.push(t.Object);
-                        continue;
+                        let vobj=v.Calculate(circum);
+                        //这里处理所有的数据对象 而不管它是什么对象
+                        if(vobj.Type=="object")
+                        {
+                            let t:LispObject=vobj as LispObject;
+                            rarr.push(t.Object);
+                            continue;
+                        }
                     }
+
                     //对于非数据对象 就只能传原始值了
-                    rarr.push(vobj);
+                    //然后就是不用计算的也是原始值
+                    rarr.push(v);
                 }
                 //调用
                 let ret= this.rawFunc.apply(this.CallThis,rarr);
