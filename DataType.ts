@@ -212,8 +212,10 @@ namespace LispExecute {
             if (pars == null || pars.childs.length < this.ParsCount) throw "错误！调用参数过少！";
             for (let i = 0; i < this.self.childs.length; ++i)
             {
+                //计算每个参数
+                let res=pars.childs[i].Calculate(circum);
                 //加入环境
-                circum(this.ParsTable[i], pars[i]);
+                circum(this.ParsTable[i], res);
             }
             //使用新的环境搜索函数计算body表
             return this.Body.Calculate(circum);
@@ -233,15 +235,17 @@ namespace LispExecute {
                 if(this.IsNeedCircum) rarr.push(circum);
                 for(let v of pars.childs)
                 {
+                    //计算
+                    let vobj=v.Calculate(circum);
                     //这里处理所有的数据对象 而不管它是什么对象
-                    if(v.Type=="object")
+                    if(vobj.Type=="object")
                     {
-                        let t:LispObject=v as LispObject;
+                        let t:LispObject=vobj as LispObject;
                         rarr.push(t.Object);
                         continue;
                     }
                     //对于非数据对象 就只能传原始值了
-                    rarr.push(v);
+                    rarr.push(vobj);
                 }
                 //调用
                 return this.rawFunc.apply(this.CallThis,rarr);

@@ -100,6 +100,9 @@ namespace LispExecute
                     let res=this.ParseCode(code,ptr+1);
                     //从新的位置开始读取
                     ptr=res.nowptr;
+                    //由于ptr指向已经读取字符的后面 又因为循环体会让ptr++
+                    //这里平衡
+                    ptr--;
                     container.childs.push(res.obj);
                 }
                 else if(c==")")
