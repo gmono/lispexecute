@@ -42,12 +42,12 @@ namespace LispExecute
          */
         protected static ReadValue(val:string):Table
         {
-            if(val[0]=='"')
+            let c=val[0];
+            if(c=="{"||c=="["||c=="\"")
             {
                 //读取字符串
                 //切片去掉前后引号
-                let retstr=val.slice(1,val.length-1);
-                return new LispObject(retstr);
+                return new LispObject(JSON.parse(val));
             }
             else
             {
@@ -77,10 +77,22 @@ namespace LispExecute
             //当前字面量缓存
             let nowval:string="";
             let isinread=false;
+            //json读取计数器
+            let objssize=0;//对象模式计数器 以左大括号+1 右大括号减1
             let isok=false;
             for(;ptr<code.length;++ptr)
             {
                 let c=code[ptr];
+                if(objssize!=0)
+                {
+                    //定义字符串读取的唯一出口 
+                    if(c=="}"||c=="]"||c=="\"")
+                    {
+                        objssize--;
+                    }
+                    nowval+=c;
+                    continue;
+                }
                 if(c==" "||c=="\t")
                 {
                     //这里逻辑为 如果在读取状态遇到空格意味着读取结束 
@@ -122,7 +134,15 @@ namespace LispExecute
                 else
                 {
                     //普通字面量
-                    if(!isinread) isinread=true;
+                    if(!isinread)
+                    {
+                        isinread=true;
+                        if(c=="{"||c=="["||c=="\"")
+                        {
+                            //开启读取字符串模式
+                            objssize++;
+                        }
+                    }
                     nowval+=c;
                 }
             }

@@ -32,11 +32,11 @@ var LispExecute;
          * @param val 字面量
          */
         Parser.ReadValue = function (val) {
-            if (val[0] == '"') {
+            var c = val[0];
+            if (c == "{" || c == "[" || c == "\"") {
                 //读取字符串
                 //切片去掉前后引号
-                var retstr = val.slice(1, val.length - 1);
-                return new LispExecute.LispObject(retstr);
+                return new LispExecute.LispObject(JSON.parse(val));
             }
             else {
                 var num = parseFloat(val);
@@ -62,9 +62,19 @@ var LispExecute;
             //当前字面量缓存
             var nowval = "";
             var isinread = false;
+            //json读取计数器
+            var objssize = 0; //对象模式计数器 以左大括号+1 右大括号减1
             var isok = false;
             for (; ptr < code.length; ++ptr) {
                 var c = code[ptr];
+                if (objssize != 0) {
+                    //定义字符串读取的唯一出口 
+                    if (c == "}" || c == "]" || c == "\"") {
+                        objssize--;
+                    }
+                    nowval += c;
+                    continue;
+                }
                 if (c == " " || c == "\t") {
                     //这里逻辑为 如果在读取状态遇到空格意味着读取结束 
                     //否则直接跳过
@@ -101,8 +111,13 @@ var LispExecute;
                 }
                 else {
                     //普通字面量
-                    if (!isinread)
+                    if (!isinread) {
                         isinread = true;
+                        if (c == "{" || c == "[" || c == "\"") {
+                            //开启读取字符串模式
+                            objssize++;
+                        }
+                    }
                     nowval += c;
                 }
             }

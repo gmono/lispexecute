@@ -20,9 +20,13 @@ var LispExecute;
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
                     }
+                    if (typeof args[0] != "number" && typeof args[0] != "string")
+                        throw new Error("错误！运算对象类型错误！");
                     var sum = typeof args[0] == "number" ? 0 : "";
                     for (var _a = 0, args_1 = args; _a < args_1.length; _a++) {
                         var t = args_1[_a];
+                        if (typeof t != "number" && typeof t != "string")
+                            throw new Error("错误！运算对象类型错误！");
                         sum += t;
                     }
                     return sum;
@@ -33,9 +37,13 @@ var LispExecute;
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
                     }
+                    if (typeof args[0] != "number")
+                        throw new Error("错误！运算对象类型错误！");
                     var sum = args[0];
                     for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
                         var t = _b[_a];
+                        if (typeof args[0] != "number")
+                            throw new Error("错误！运算对象类型错误！");
                         sum -= t;
                     }
                     return sum;
@@ -68,7 +76,8 @@ var LispExecute;
                         }
                     }
                     else
-                        return null;
+                        throw new Error("错误！运算对象类型错误！");
+                    ;
                     return sum;
                 } });
             this.SetSymbol({ key: '/', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
@@ -76,9 +85,13 @@ var LispExecute;
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
                     }
+                    if (typeof args[0] != "number")
+                        throw new Error("错误！运算对象类型错误！");
                     var sum = args[0];
                     for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
                         var t = _b[_a];
+                        if (typeof args[0] != "number")
+                            throw new Error("错误！运算对象类型错误！");
                         sum /= t;
                     }
                     return sum;
@@ -187,6 +200,35 @@ var LispExecute;
                     //加入环境
                     circum(proc.Name, proc);
                 } });
+            this.SetSymbol({ key: 'if', isneedcircum: true, callthis: null, isneedcal: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    //这里来判断条件
+                    if (args.length < 2)
+                        throw new Error("错误！IF操作参数过少！");
+                    var p = args[0];
+                    var res = p.Calculate(circum);
+                    var bres = true;
+                    if (res.Type == "object") {
+                        var rres = res;
+                        if (rres.Object == false)
+                            bres = false;
+                        //除了false其他都被作为true
+                    }
+                    //如果条件为真则执行A 否则如果有B则执行B 没有就返回空表
+                    var A = args[1];
+                    if (bres) {
+                        return A.Calculate(circum);
+                    }
+                    if (args.length >= 3) {
+                        var B = args[2];
+                        return B.Calculate(circum);
+                    }
+                    else
+                        return undefined;
+                } });
         };
         /**
          * 设置一个符号 可以覆盖
@@ -242,7 +284,7 @@ var LispExecute;
             var _this = this;
             var func = function (name, val) {
                 if (val == null)
-                    return _this.TopContainer.has(name) ? _this.TopContainer.get(name) : null;
+                    return _this.TopContainer.has(name) ? _this.TopContainer.get(name) : undefined;
                 _this.TopContainer.set(name, val);
             };
             var ret = obj.Calculate(func);

@@ -67,6 +67,8 @@ var LispExecute;
     /**
      * 此为对数据对象的统一封装
      * 计算为直接返回自己
+     * 注意存在特殊值：undefined与空表不同 也算作object的一部分
+     * 因此LispObject实际代表了除了DataType内部类型和function外的所有外部类型
      */
     var LispObject = (function (_super) {
         __extends(LispObject, _super);

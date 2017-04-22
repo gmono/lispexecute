@@ -18,18 +18,22 @@ namespace LispExecute
         protected AddPreSymbols()
         {
             this.SetSymbol(<SymPair>{key:'+',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                if(typeof args[0]!="number"&&typeof args[0]!="string") throw new Error("错误！运算对象类型错误！");
                 let sum=typeof args[0] =="number"? 0:"";
                 for(let t of args)
                 {
-                    sum+=t;
+                    if(typeof t!="number"&&typeof t!="string") throw new Error("错误！运算对象类型错误！");
+                    sum+=<any>t;
                 }
                 return sum;
             }});
             //减法只能用于数字
             this.SetSymbol(<SymPair>{key:'-',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                 let sum=args[0];
                 for(let t of args.slice(1,args.length))
                 {
+                    if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                     sum-=t;
                 }
                 return sum;
@@ -59,13 +63,15 @@ namespace LispExecute
                            sum*=a;
                        }
                    }
-                   else return null;
+                   else throw new Error("错误！运算对象类型错误！");;
                    return sum;
                }});
             this.SetSymbol(<SymPair>{key:'/',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+                if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                 let sum=args[0];
                 for(let t of args.slice(1,args.length))
                 {
+                    if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                     sum/=t;
                 }
                 return sum;
@@ -141,6 +147,31 @@ namespace LispExecute
                 //加入环境
                 circum(proc.Name,proc);
             }});
+            this.SetSymbol(<SymPair>{key:'if',isneedcircum:true,callthis:null,isneedcal:false,val:(circum:SymbolFunc,...args)=>{
+                //这里来判断条件
+                if(args.length<2) throw new Error("错误！IF操作参数过少！");
+                let p=args[0] as Table;
+                let res=p.Calculate(circum);
+                let bres=true;
+                if(res.Type=="object")
+                {
+                    let rres=res as LispObject;
+                    if(rres.Object==false) bres=false;
+                    //除了false其他都被作为true
+                }
+                //如果条件为真则执行A 否则如果有B则执行B 没有就返回空表
+                let A=args[1] as Table;
+                if(bres)
+                {
+                    return A.Calculate(circum);
+                }
+                if(args.length>=3)
+                {
+                    let B=args[2] as Table;
+                    return B.Calculate(circum);
+                }
+                else return undefined;
+            }});
         }
         public constructor(initstate?:SymPair[])
         {
@@ -213,7 +244,7 @@ namespace LispExecute
         public Run(obj:Table)
         {
             let func=(name:string,val?:Table)=>{
-                if(val==null) return this.TopContainer.has(name)? this.TopContainer.get(name):null;
+                if(val==null) return this.TopContainer.has(name)? this.TopContainer.get(name):undefined;
                 this.TopContainer.set(name,val);
             }
             let ret=obj.Calculate(func);
