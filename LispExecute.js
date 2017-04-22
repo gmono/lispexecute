@@ -305,9 +305,16 @@ var LispExecute;
                             }
                         }
                         if (isok) {
-                            var func_1 = now;
-                            var proc = new LispExecute.LispRawProcess(func_1.name, func_1, false, old, true, true);
-                            return proc;
+                            if (typeof now == "function") {
+                                var func_1 = now;
+                                var proc = new LispExecute.LispRawProcess(func_1.name, func_1, false, old, true, true);
+                                return proc;
+                            }
+                            else {
+                                //构造普通对象
+                                var ret_1 = new LispExecute.LispObject(now);
+                                return ret_1;
+                            }
                         }
                     }
                     return undefined;

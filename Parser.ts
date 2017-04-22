@@ -42,6 +42,7 @@ namespace LispExecute
          */
         protected static ReadValue(val:string):Table
         {
+            val=val.trim();
             let c=val[0];
             if(c=="{"||c=="["||c=="\""||val=="true"||val=="false")
             {

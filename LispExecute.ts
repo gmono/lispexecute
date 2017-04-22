@@ -270,9 +270,19 @@ namespace LispExecute
                         }
                         if(isok)
                         {
-                            let func=now as Function;
-                            let proc=new LispRawProcess(func.name,func,false,old,true,true);
-                            return proc;
+                            if(typeof now =="function")
+                            {
+                                let func=now as Function;
+                                let proc=new LispRawProcess(func.name,func,false,old,true,true);
+                                return proc;
+                            }
+                            else
+                            {
+                                //构造普通对象
+                                let ret=new LispObject(now);
+                                return ret;
+                            }
+
                         }
                     }
                     return undefined;

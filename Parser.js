@@ -32,6 +32,7 @@ var LispExecute;
          * @param val 字面量
          */
         Parser.ReadValue = function (val) {
+            val = val.trim();
             var c = val[0];
             if (c == "{" || c == "[" || c == "\"" || val == "true" || val == "false") {
                 //读取字符串
