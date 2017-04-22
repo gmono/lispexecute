@@ -280,11 +280,38 @@ var LispExecute;
                 return lobj;
             }
         };
-        Lisp.prototype.Run = function (obj) {
+        /**
+         *
+         * @param obj 要计算的顶层表
+         * @param link 要链接到的js顶层对象
+         */
+        Lisp.prototype.Run = function (obj, link) {
             var _this = this;
             var func = function (name, val) {
-                if (val == null)
-                    return _this.TopContainer.has(name) ? _this.TopContainer.get(name) : undefined;
+                if (val == null) {
+                    if (_this.TopContainer.has(name))
+                        return _this.TopContainer.get(name);
+                    if (link != null) {
+                        var now = link;
+                        var old = void 0;
+                        var paths = name.split('.');
+                        var isok = true; //是否成功找到
+                        for (var i = 0; i < paths.length; ++i) {
+                            old = now;
+                            now = now[paths[i]];
+                            if (now == null) {
+                                isok = false;
+                                break;
+                            }
+                        }
+                        if (isok) {
+                            var func_1 = now;
+                            var proc = new LispExecute.LispRawProcess(func_1.name, func_1, false, old, true, true);
+                            return proc;
+                        }
+                    }
+                    return undefined;
+                }
                 _this.TopContainer.set(name, val);
             };
             var ret = obj.Calculate(func);

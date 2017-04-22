@@ -33,7 +33,7 @@ var LispExecute;
          */
         Parser.ReadValue = function (val) {
             var c = val[0];
-            if (c == "{" || c == "[" || c == "\"") {
+            if (c == "{" || c == "[" || c == "\"" || val == "true" || val == "false") {
                 //读取字符串
                 //切片去掉前后引号
                 return new LispExecute.LispObject(JSON.parse(val));

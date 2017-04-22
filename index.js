@@ -18,7 +18,7 @@ window.onload = function () {
             try {
                 displaycom(str);
                 let table = LispExecute.Parser.Parse(str);
-                let res = obj.Run(table);
+                let res = obj.Run(table,window);
                 if(typeof res=="object") res=JSON.stringify(res);
                 displayres("> " + res);
             } catch (e) {

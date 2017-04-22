@@ -241,12 +241,44 @@ namespace LispExecute
                     return lobj;
                 }
         }
-        public Run(obj:Table)
+        /**
+         * 
+         * @param obj 要计算的顶层表
+         * @param link 要链接到的js顶层对象
+         */
+        public Run(obj:Table,link?:object)
         {
             let func=(name:string,val?:Table)=>{
-                if(val==null) return this.TopContainer.has(name)? this.TopContainer.get(name):undefined;
+                if(val==null)
+                {
+                    if(this.TopContainer.has(name)) return this.TopContainer.get(name);
+                    if(link!=null)
+                    {
+                        let now=link;
+                        let old;
+                        let paths=name.split('.');
+                        let isok=true;//是否成功找到
+                        for(let i=0;i<paths.length;++i)
+                        {
+                            old=now;
+                            now=now[paths[i]];
+                            if(now==null)
+                            {
+                                isok=false;
+                                break;
+                            }
+                        }
+                        if(isok)
+                        {
+                            let func=now as Function;
+                            let proc=new LispRawProcess(func.name,func,false,old,true,true);
+                            return proc;
+                        }
+                    }
+                    return undefined;
+                }
                 this.TopContainer.set(name,val);
-            }
+            };
             let ret=obj.Calculate(func);
             return this.ToRaw(ret);
         }

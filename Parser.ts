@@ -43,7 +43,7 @@ namespace LispExecute
         protected static ReadValue(val:string):Table
         {
             let c=val[0];
-            if(c=="{"||c=="["||c=="\"")
+            if(c=="{"||c=="["||c=="\""||val=="true"||val=="false")
             {
                 //读取字符串
                 //切片去掉前后引号
