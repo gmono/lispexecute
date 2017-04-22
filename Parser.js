@@ -107,7 +107,7 @@ var LispExecute;
                 }
             }
             if (!isok)
-                return null;
+                throw new Error("解析错误！解析过程未正常结束！");
             return { nowptr: ptr, obj: container };
         };
         return Parser;

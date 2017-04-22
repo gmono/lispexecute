@@ -126,7 +126,7 @@ namespace LispExecute
                     nowval+=c;
                 }
             }
-            if(!isok) return null;
+            if(!isok) throw new Error("解析错误！解析过程未正常结束！");
             return <ReadStruct>{nowptr:ptr,obj:container};
         }
     }
