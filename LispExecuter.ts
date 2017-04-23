@@ -132,8 +132,8 @@ namespace LispExecute
                 {
                     //变量定义
                     if(args.length>2) throw new Error("变量定义形式错误！参数数量不正确");
-                    let val=args[1];
-                    circum.Set((<LispSymbolRefence>head).name,val);
+                    let val=args[1] as Table;
+                    circum.Set((<LispSymbolRefence>head).name,val.Calculate(circum));
                     return undefined;
                 }
                 if(head.Type=="normal")

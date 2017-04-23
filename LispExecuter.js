@@ -201,7 +201,7 @@ var LispExecute;
                         if (args.length > 2)
                             throw new Error("变量定义形式错误！参数数量不正确");
                         var val = args[1];
-                        circum.Set(head.name, val);
+                        circum.Set(head.name, val.Calculate(circum));
                         return undefined;
                     }
                     if (head.Type == "normal") {
