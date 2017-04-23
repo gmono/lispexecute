@@ -99,14 +99,20 @@ var LispExecute;
                 return this;
             //得到第一个子表 此表必须是一个符号引用
             var sym = this.childs[0];
+            // while(sym.type!="process"&&sym.type!="object")
+            // {
+            //     sym=sym.Calculate(circum);
+            // }
+            if (sym.type == "symbol")
+                sym = sym.Calculate(circum);
+            //知道追溯符号到尽头
             //对表求值 得到一个process而不管其如何得到
-            var func = sym.Calculate(circum);
-            if (func.type == "process") {
+            if (sym.type == "process") {
                 //构造参数表
                 var pars = new Table();
                 pars.childs = this.childs.slice(1, this.childs.length);
                 //调用Process
-                return func.Call(circum, pars);
+                return sym.Call(circum, pars);
             }
             //如果不是process则错误
             throw new Error("错误，只能对过程执行计算!");

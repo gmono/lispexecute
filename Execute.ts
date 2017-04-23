@@ -79,6 +79,45 @@ namespace LispExecute
             //不需要转换就直接返回
             return obj;
         }
+        public ToString(obj:Table)
+        {
+            //内部计算函数
+            let infun=(tobj:Table)=>{
+                let res="";
+                if(tobj.Type=="normal")
+                {
+                    let nowres="";
+                    for(let t of tobj.childs)
+                    {
+                        nowres+=`${infun(t)} `;
+                    }
+                    //这一步去掉末尾空格
+                    nowres=nowres.slice(0,nowres.length-1);
+                    res=`(${nowres})`;
+                }
+                else if(tobj.Type=="symbol")
+                {
+                    //处理符号 符号表示为符号名字
+                    res=(<LispSymbolRefence>tobj).name;
+                }
+                else if(tobj.Type=="process")
+                {
+                    res=`#process:${(<LispProcess>tobj).Name}`;
+                }
+                else
+                {
+                    //为数据对象时就调用json转换为文本
+                    res=JSON.stringify(this.ToRaw(tobj));
+                }
+                return res;
+            };
+            let result=infun(obj);
+            if(obj.Type!="object")
+            {
+                result=`'${result}`;
+            }
+            return result;
+        }
         /**
          * 此处sympair中仅val和函数专属的属性有效key可以为null
          * @param sym 符号 key无用
@@ -95,7 +134,7 @@ namespace LispExecute
                 {
                     //封装函数
                     let fun:Function=sym.val as Function;
-                    let func=new LispRawProcess(fun.name,fun,sym.isneedcircum,sym.callthis,sym.isneedcal,sym.isneedtrans);
+                    let func=new LispRawProcess(sym.key,fun,sym.isneedcircum,sym.callthis,sym.isneedcal,sym.isneedtrans);
                     return func;
                 }
                 else
@@ -109,10 +148,14 @@ namespace LispExecute
          * @param obj 要计算的顶层表
          * @param link 要链接到的js顶层对象
          */
-        public Run(obj:Table)
+        public Run(obj:Table,isstring:boolean=false)
         {
             let ret=obj.Calculate(this.TopContainer);
-            return this.ToRaw(ret);
+            if(!isstring) return this.ToRaw(ret);
+            else
+            {
+                return this.ToString(ret);
+            }
         }
     }
 }

@@ -74,6 +74,40 @@ var LispExecute;
             //不需要转换就直接返回
             return obj;
         };
+        Executer.prototype.ToString = function (obj) {
+            var _this = this;
+            //内部计算函数
+            var infun = function (tobj) {
+                var res = "";
+                if (tobj.Type == "normal") {
+                    var nowres = "";
+                    for (var _i = 0, _a = tobj.childs; _i < _a.length; _i++) {
+                        var t = _a[_i];
+                        nowres += infun(t) + " ";
+                    }
+                    //这一步去掉末尾空格
+                    nowres = nowres.slice(0, nowres.length - 1);
+                    res = "(" + nowres + ")";
+                }
+                else if (tobj.Type == "symbol") {
+                    //处理符号 符号表示为符号名字
+                    res = tobj.name;
+                }
+                else if (tobj.Type == "process") {
+                    res = "#process:" + tobj.Name;
+                }
+                else {
+                    //为数据对象时就调用json转换为文本
+                    res = JSON.stringify(_this.ToRaw(tobj));
+                }
+                return res;
+            };
+            var result = infun(obj);
+            if (obj.Type != "object") {
+                result = "'" + result;
+            }
+            return result;
+        };
         /**
          * 此处sympair中仅val和函数专属的属性有效key可以为null
          * @param sym 符号 key无用
@@ -87,7 +121,7 @@ var LispExecute;
             else if (typeof sym.val == "function") {
                 //封装函数
                 var fun = sym.val;
-                var func = new LispExecute.LispRawProcess(fun.name, fun, sym.isneedcircum, sym.callthis, sym.isneedcal, sym.isneedtrans);
+                var func = new LispExecute.LispRawProcess(sym.key, fun, sym.isneedcircum, sym.callthis, sym.isneedcal, sym.isneedtrans);
                 return func;
             }
             else {
@@ -100,9 +134,14 @@ var LispExecute;
          * @param obj 要计算的顶层表
          * @param link 要链接到的js顶层对象
          */
-        Executer.prototype.Run = function (obj) {
+        Executer.prototype.Run = function (obj, isstring) {
+            if (isstring === void 0) { isstring = false; }
             var ret = obj.Calculate(this.TopContainer);
-            return this.ToRaw(ret);
+            if (!isstring)
+                return this.ToRaw(ret);
+            else {
+                return this.ToString(ret);
+            }
         };
         return Executer;
     }());

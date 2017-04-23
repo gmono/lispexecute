@@ -188,6 +188,10 @@ namespace LispExecute
                 //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
   
             }});
+            this.SetSymbol(<SymPair>{key:'quote',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                return args[0];
+            }});
         }
     }
 }
