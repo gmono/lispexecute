@@ -194,7 +194,7 @@ var LispExecute;
                     //否则则为变量定义
                     //注意define操作符不返回值 即返回undefined
                     if (args.length < 2)
-                        throw new Error("定义错误！参数数量不正确");
+                        throw new Error("参数数量不正确");
                     var head = args[0];
                     if (head.Type == "symbol") {
                         //变量定义
@@ -269,6 +269,39 @@ var LispExecute;
                     if (args.length != 1)
                         throw "参数数量错误！";
                     return args[0];
+                } });
+            this.SetSymbol({ key: 'lambda', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    //判断定义类型 如果def部分为normal表则为过程定义
+                    //否则则为变量定义
+                    //注意define操作符不返回值 即返回undefined
+                    if (args.length < 2)
+                        throw new Error("参数数量不正确");
+                    var head = args[0];
+                    if (head.Type != "normal" && head.Type != "symbol") {
+                        throw new Error("符号定义错误！头部类型不正确");
+                    }
+                    //这里来构造一个process
+                    //先构造body
+                    var bodylist = args.slice(1, args.length); //得到body序列
+                    //合成一个body
+                    var body = new LispExecute.Table();
+                    body.childs.push(new LispExecute.LispSymbolRefence("do")); //使用do操作符连接多个table
+                    body.childs = body.childs.concat(bodylist);
+                    var def = new LispExecute.Table();
+                    var thead = new LispExecute.Table();
+                    //添加匿名头
+                    thead.childs.push(new LispExecute.LispSymbolRefence(""));
+                    if (head.Type == "normal") {
+                        thead.childs = thead.childs.concat(head.childs);
+                    }
+                    def.childs[0] = thead;
+                    def.childs[1] = body;
+                    var proc = new LispExecute.LispDefProcess(def);
+                    return proc;
                 } });
         };
         return LispExecuter;

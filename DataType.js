@@ -103,7 +103,7 @@ var LispExecute;
             // {
             //     sym=sym.Calculate(circum);
             // }
-            if (sym.type == "symbol")
+            if (sym.type != "object")
                 sym = sym.Calculate(circum);
             //知道追溯符号到尽头
             //对表求值 得到一个process而不管其如何得到
@@ -222,6 +222,8 @@ var LispExecute;
         });
         Object.defineProperty(LispDefProcess.prototype, "Name", {
             get: function () {
+                //匿名函数
+                // if(this.self.childs[0].Empty()) return "";
                 var t = this.self.childs[0].childs[0];
                 return t.name;
             },

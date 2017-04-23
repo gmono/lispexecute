@@ -90,7 +90,7 @@ namespace LispExecute {
             // {
             //     sym=sym.Calculate(circum);
             // }
-            if(sym.type=="symbol") sym=sym.Calculate(circum);
+            if(sym.type!="object") sym=sym.Calculate(circum);
             //知道追溯符号到尽头
             //对表求值 得到一个process而不管其如何得到
             if (sym.type == "process")
@@ -195,6 +195,8 @@ namespace LispExecute {
         }
         public get Name(): string
         {
+            //匿名函数
+            // if(this.self.childs[0].Empty()) return "";
             let t = this.self.childs[0].childs[0] as LispSymbolRefence;
             return t.name;
         }

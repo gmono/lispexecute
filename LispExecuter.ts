@@ -126,7 +126,7 @@ namespace LispExecute
                 //判断定义类型 如果def部分为normal表则为过程定义
                 //否则则为变量定义
                 //注意define操作符不返回值 即返回undefined
-                if(args.length<2) throw new Error("定义错误！参数数量不正确");
+                if(args.length<2) throw new Error("参数数量不正确");
                 let head=<Table>args[0];
                 if(head.Type=="symbol")
                 {
@@ -191,6 +191,37 @@ namespace LispExecute
             this.SetSymbol(<SymPair>{key:'quote',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return args[0];
+            }});
+            this.SetSymbol(<SymPair>{key:'lambda',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+                //判断定义类型 如果def部分为normal表则为过程定义
+                //否则则为变量定义
+                //注意define操作符不返回值 即返回undefined
+                if(args.length<2) throw new Error("参数数量不正确");
+                let head=<Table>args[0];
+                if(head.Type!="normal"&&head.Type!="symbol")
+                {
+                    throw new Error("符号定义错误！头部类型不正确");
+                }
+                    //这里来构造一个process
+                    //先构造body
+                    let bodylist=args.slice(1,args.length);//得到body序列
+
+                    //合成一个body
+                    let body=new Table();
+                    body.childs.push(new LispSymbolRefence("do"));//使用do操作符连接多个table
+                    body.childs=body.childs.concat(bodylist);
+                    let def=new Table();
+                    let thead=new Table();
+                    //添加匿名头
+                    thead.childs.push(new LispSymbolRefence(""));
+                    if(head.Type=="normal")
+                    {
+                        thead.childs=thead.childs.concat(head.childs);
+                    }
+                    def.childs[0]=thead;
+                    def.childs[1]=body;
+                    let proc=new LispDefProcess(def);
+                    return proc;
             }});
         }
     }

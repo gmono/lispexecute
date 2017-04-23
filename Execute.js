@@ -103,7 +103,7 @@ var LispExecute;
                 return res;
             };
             var result = infun(obj);
-            if (obj.Type != "object") {
+            if (obj.Type != "object" && obj.Type != "process") {
                 result = "'" + result;
             }
             return result;

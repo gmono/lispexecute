@@ -112,7 +112,7 @@ namespace LispExecute
                 return res;
             };
             let result=infun(obj);
-            if(obj.Type!="object")
+            if(obj.Type!="object"&&obj.Type!="process")
             {
                 result=`'${result}`;
             }
