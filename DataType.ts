@@ -1,8 +1,58 @@
 namespace LispExecute {
-    //符号搜索函数范式
-    //如果不提供后面的newval 则为获取值 返回搜索结果
-    //否则则为设置值 返回newval
-    export type SymbolFunc = (symbol: string, newval?: Table) => Table;
+    /**
+     * 一般环境提供者
+     * 一般来说 子类只需要重写TrySearch方法和 TrySet方法即可即可
+     * TrySearch中进行具体操作 TrySet中进行存在检测
+     */
+    export class Circumstance
+    {
+        protected selfmap:Map<string,Table>=new Map<string,Table>();
+        public constructor(protected supercir:Circumstance=null)
+        {
+        }
+        /**
+         * 搜索一个符号 搜索不到抛出错误
+         * @param name 符号名
+         */
+        public Search(name:string)
+        {
+            let ret=this.TrySearch(name);
+            if(ret==undefined) throw new Error("符号引用错误！");
+            return ret;
+        }
+        /**
+         * 搜索一个符号 搜索不到返回undefined
+         * @param name 符号名
+         */
+        public TrySearch(name:string)
+        {
+            if(this.selfmap.has(name))
+                return this.selfmap.get(name);
+            if(this.supercir!=null) return this.supercir.TrySearch(name);
+            return undefined;
+        }
+        /**
+         * 设置一个符号 允许覆盖
+         * @param name 符号名
+         * @param value 新符号值
+         */
+        public Set(name:string,value:Table)
+        {
+            this.selfmap.set(name,value);
+        }
+        /**
+         * 设置一个符号 不允许覆盖
+         * @param name 符号名
+         * @param value 新值
+         */
+        public TrySet(name:string,value:Table)
+        {
+            if(this.TrySearch(name)==undefined)
+            {
+                this.Set(name,value);
+            }
+        }
+    }
     /**
      * 基本数据类型：表
      * 此表为通用表 特殊表可以有自己专属的方法 供装饰内部符号使用
@@ -31,7 +81,7 @@ namespace LispExecute {
          * 复合表会计算后返回
          * 以下过程说明 对于常规（复合）表而言 计算就是过程调用
          */
-        public Calculate(circum: SymbolFunc): Table
+        public Calculate(circum: Circumstance): Table
         {
             if (this.childs == null || this.childs.length == 0) return this;
             //得到第一个子表 此表必须是一个符号引用
@@ -71,7 +121,7 @@ namespace LispExecute {
             this.Object=value;
             this.type="object";
         }
-        public Calculate(circum: SymbolFunc): Table
+        public Calculate(circum: Circumstance): Table
         {
             return this;
         }
@@ -92,9 +142,9 @@ namespace LispExecute {
          * 根据自身符号从环境中找到Table然后返回
          * @param circum 环境
          */
-        public Calculate(circum: SymbolFunc): Table
+        public Calculate(circum: Circumstance): Table
         {
-            let ret = circum(this.name);
+            let ret = circum.Search(this.name);
             if (ret == null) throw new Error("符号引用错误！不存在这样的符号！");
             return ret;
         }
@@ -102,7 +152,7 @@ namespace LispExecute {
     export abstract class LispProcess extends Table
     {
 
-        public abstract Call(circum: SymbolFunc, pars: Table): Table;
+        public abstract Call(circum: Circumstance, pars: Table): Table;
         public abstract get Name(): string;
     }
     /**
@@ -118,7 +168,9 @@ namespace LispExecute {
             //保存过程定义
             if (def == null || def.childs.length != 2) throw new Error("过程定义错误！");
             //检测参数表
-            for(let a of def.childs[0].childs)
+            let deftable=def.childs[0];
+            if(deftable.Type!="normal") throw new Error("过程定义符号表必须为Normal型!");
+            for(let a of deftable.childs)
             {
                 if(!(a instanceof LispSymbolRefence))
                 {
@@ -153,7 +205,7 @@ namespace LispExecute {
         {
             return this.self.childs[1];
         }
-        public Calculte(circum: SymbolFunc): Table
+        public Calculte(circum: Circumstance): Table
         {
             throw new Error("错误，不能直接计算Process表,应使用Call方法调用");
         }
@@ -164,33 +216,57 @@ namespace LispExecute {
          * @param circum 上层环境
          * @param pars 参数表 取其childs对形参表做替换
          */
-        public Call(circum: SymbolFunc, pars: Table): Table
+        public Call(circum: Circumstance, pars: Table): Table
         {
             //构造此层搜索函数和环境
-            let thiscir = new Map<string, Table>();
-            let searfun = (name: string, newval?: Table) => {
-                if (newval == null)
-                {
-                    if (thiscir.has(name)) return thiscir.get(name);
-                    return circum(name);
-                }
-                //赋值
-                thiscir.set(name, newval);
-                return newval;
-            }
+            let searfun=new Circumstance(circum);
+            //添加自身
+            searfun.Set("this",this);
             //将参数加入环境
             if (pars == null || pars.childs.length < this.ParsCount) throw "错误！调用参数过少！";
             for (let i = 0; i < this.ParsTable.childs.length; ++i)
             {
-                //计算每个参数
+                //计算每个参数 注意计算参数时以上层的环境为环境
                 let res=pars.childs[i].Calculate(circum);
                 //加入环境
-                searfun((<LispSymbolRefence>this.ParsTable.childs[i]).name, res);
+                searfun.Set((<LispSymbolRefence>this.ParsTable.childs[i]).name, res);
             }
             //使用新的环境搜索函数计算body表
             return this.Body.Calculate(searfun);
         }
     }
+
+
+
+/**
+ * 此为用于链接RawProcess与内部环境的环境
+ * 此环境为一个链接层 本身并不保存任何符号
+ * 因此这里的trysearch和set都直接链接
+ */
+    class RawCircum extends Circumstance
+    {
+        public constructor(circum:Circumstance,protected rfuncbody:LispRawProcess)
+        {
+            super(circum);
+        }
+        public TrySearch(name:string)
+        {
+            if(name=="this")
+            {
+                return this.rfuncbody;
+            }
+            return this.supercir.TrySearch(name);
+        }
+        public TrySet(name:string,value:Table)
+        {
+            return this.supercir.TrySet(name,value);
+        }
+        public Set(name:string,value:Table)
+        {
+            return this.supercir.Set(name,value);
+        }
+        
+    };
     /**
      * 特殊过程：原生过程
      * 此类接收一个函数 并代表这个函数
@@ -198,33 +274,39 @@ namespace LispExecute {
      */
     export class LispRawProcess extends LispProcess
     {
-            public Call(circum: SymbolFunc, pars: Table): Table
+
+            public Call(circum: Circumstance, pars: Table): Table
             {
+                //构造链接层
+                let thiscircum=new RawCircum(circum,this);
                 //转换参数
                 let rarr=[];
-                if(this.IsNeedCircum) rarr.push(circum);
+                if(this.IsNeedCircum) rarr.push(thiscircum);
                 for(let v of pars.childs)
                 {
                     //根据是否需要计算的标记 选择计算还是保持原值(原表结构)
+                    let vobj=v;
                     if(this.IsNeedCal)
                     {
-                        let vobj=v.Calculate(circum);
-                        //这里处理所有的数据对象 而不管它是什么对象
-                        if(vobj.Type=="object")
+                        //计算参数以上层环境为环境
+                        vobj=v.Calculate(circum);
+                    }
+                        //当vboj是一个对象并且需要转换时 转换为js原生对象
+                        if(vobj.Type=="object"&&this.IsNeedTrans)
                         {
                             let t:LispObject=vobj as LispObject;
                             rarr.push(t.Object);
                             continue;
                         }
-                    }
-
-                    //对于非数据对象 就只能传原始值了
+                    //对于非数据对象 或者不需要转换的数据对象 就只能传原始值了
                     //然后就是不用计算的也是原始值
-                    rarr.push(v);
+                    rarr.push(vobj);
                 }
                 //调用
                 let ret= this.rawFunc.apply(this.CallThis,rarr);
+                //返回是表就不做处理
                 if(ret instanceof Table) return ret;
+                //做对应处理
                 switch(typeof ret)
                 {
                     case "function":

@@ -11,6 +11,59 @@ var __extends = (this && this.__extends) || (function () {
 var LispExecute;
 (function (LispExecute) {
     /**
+     * 一般环境提供者
+     * 一般来说 子类只需要重写TrySearch方法和 TrySet方法即可即可
+     * TrySearch中进行具体操作 TrySet中进行存在检测
+     */
+    var Circumstance = (function () {
+        function Circumstance(supercir) {
+            if (supercir === void 0) { supercir = null; }
+            this.supercir = supercir;
+            this.selfmap = new Map();
+        }
+        /**
+         * 搜索一个符号 搜索不到抛出错误
+         * @param name 符号名
+         */
+        Circumstance.prototype.Search = function (name) {
+            var ret = this.TrySearch(name);
+            if (ret == undefined)
+                throw new Error("符号引用错误！");
+            return ret;
+        };
+        /**
+         * 搜索一个符号 搜索不到返回undefined
+         * @param name 符号名
+         */
+        Circumstance.prototype.TrySearch = function (name) {
+            if (this.selfmap.has(name))
+                return this.selfmap.get(name);
+            if (this.supercir != null)
+                return this.supercir.TrySearch(name);
+            return undefined;
+        };
+        /**
+         * 设置一个符号 允许覆盖
+         * @param name 符号名
+         * @param value 新符号值
+         */
+        Circumstance.prototype.Set = function (name, value) {
+            this.selfmap.set(name, value);
+        };
+        /**
+         * 设置一个符号 不允许覆盖
+         * @param name 符号名
+         * @param value 新值
+         */
+        Circumstance.prototype.TrySet = function (name, value) {
+            if (this.TrySearch(name) == undefined) {
+                this.Set(name, value);
+            }
+        };
+        return Circumstance;
+    }());
+    LispExecute.Circumstance = Circumstance;
+    /**
      * 基本数据类型：表
      * 此表为通用表 特殊表可以有自己专属的方法 供装饰内部符号使用
      * 此处明确一个概念 表这是一种通用数据结构
@@ -104,7 +157,7 @@ var LispExecute;
          * @param circum 环境
          */
         LispSymbolRefence.prototype.Calculate = function (circum) {
-            var ret = circum(this.name);
+            var ret = circum.Search(this.name);
             if (ret == null)
                 throw new Error("符号引用错误！不存在这样的符号！");
             return ret;
@@ -133,7 +186,10 @@ var LispExecute;
             if (def == null || def.childs.length != 2)
                 throw new Error("过程定义错误！");
             //检测参数表
-            for (var _i = 0, _a = def.childs[0].childs; _i < _a.length; _i++) {
+            var deftable = def.childs[0];
+            if (deftable.Type != "normal")
+                throw new Error("过程定义符号表必须为Normal型!");
+            for (var _i = 0, _a = deftable.childs; _i < _a.length; _i++) {
                 var a = _a[_i];
                 if (!(a instanceof LispSymbolRefence)) {
                     throw new Error("错误！过程声明中必须全为SymbolRefence");
@@ -195,25 +251,17 @@ var LispExecute;
         */
         LispDefProcess.prototype.Call = function (circum, pars) {
             //构造此层搜索函数和环境
-            var thiscir = new Map();
-            var searfun = function (name, newval) {
-                if (newval == null) {
-                    if (thiscir.has(name))
-                        return thiscir.get(name);
-                    return circum(name);
-                }
-                //赋值
-                thiscir.set(name, newval);
-                return newval;
-            };
+            var searfun = new Circumstance(circum);
+            //添加自身
+            searfun.Set("this", this);
             //将参数加入环境
             if (pars == null || pars.childs.length < this.ParsCount)
                 throw "错误！调用参数过少！";
             for (var i = 0; i < this.ParsTable.childs.length; ++i) {
-                //计算每个参数
+                //计算每个参数 注意计算参数时以上层的环境为环境
                 var res = pars.childs[i].Calculate(circum);
                 //加入环境
-                searfun(this.ParsTable.childs[i].name, res);
+                searfun.Set(this.ParsTable.childs[i].name, res);
             }
             //使用新的环境搜索函数计算body表
             return this.Body.Calculate(searfun);
@@ -221,6 +269,33 @@ var LispExecute;
         return LispDefProcess;
     }(LispProcess));
     LispExecute.LispDefProcess = LispDefProcess;
+    /**
+     * 此为用于链接RawProcess与内部环境的环境
+     * 此环境为一个链接层 本身并不保存任何符号
+     * 因此这里的trysearch和set都直接链接
+     */
+    var RawCircum = (function (_super) {
+        __extends(RawCircum, _super);
+        function RawCircum(circum, rfuncbody) {
+            var _this = _super.call(this, circum) || this;
+            _this.rfuncbody = rfuncbody;
+            return _this;
+        }
+        RawCircum.prototype.TrySearch = function (name) {
+            if (name == "this") {
+                return this.rfuncbody;
+            }
+            return this.supercir.TrySearch(name);
+        };
+        RawCircum.prototype.TrySet = function (name, value) {
+            return this.supercir.TrySet(name, value);
+        };
+        RawCircum.prototype.Set = function (name, value) {
+            return this.supercir.Set(name, value);
+        };
+        return RawCircum;
+    }(Circumstance));
+    ;
     /**
      * 特殊过程：原生过程
      * 此类接收一个函数 并代表这个函数
@@ -251,30 +326,36 @@ var LispExecute;
             return _this;
         }
         LispRawProcess.prototype.Call = function (circum, pars) {
+            //构造链接层
+            var thiscircum = new RawCircum(circum, this);
             //转换参数
             var rarr = [];
             if (this.IsNeedCircum)
-                rarr.push(circum);
+                rarr.push(thiscircum);
             for (var _i = 0, _a = pars.childs; _i < _a.length; _i++) {
                 var v = _a[_i];
                 //根据是否需要计算的标记 选择计算还是保持原值(原表结构)
+                var vobj = v;
                 if (this.IsNeedCal) {
-                    var vobj = v.Calculate(circum);
-                    //这里处理所有的数据对象 而不管它是什么对象
-                    if (vobj.Type == "object") {
-                        var t = vobj;
-                        rarr.push(t.Object);
-                        continue;
-                    }
+                    //计算参数以上层环境为环境
+                    vobj = v.Calculate(circum);
                 }
-                //对于非数据对象 就只能传原始值了
+                //当vboj是一个对象并且需要转换时 转换为js原生对象
+                if (vobj.Type == "object" && this.IsNeedTrans) {
+                    var t = vobj;
+                    rarr.push(t.Object);
+                    continue;
+                }
+                //对于非数据对象 或者不需要转换的数据对象 就只能传原始值了
                 //然后就是不用计算的也是原始值
-                rarr.push(v);
+                rarr.push(vobj);
             }
             //调用
             var ret = this.rawFunc.apply(this.CallThis, rarr);
+            //返回是表就不做处理
             if (ret instanceof Table)
                 return ret;
+            //做对应处理
             switch (typeof ret) {
                 case "function":
                     return new LispRawProcess("", ret);

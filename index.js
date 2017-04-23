@@ -7,7 +7,7 @@ function displaycom(str) {
     let view = document.getElementById("command");
     view.innerHTML += str + "\n";
 }
-let obj = new LispExecute.Lisp();
+let obj = new LispExecute.LispExecuter(window);
 window.onload = function () {
     let area = document.getElementById("inputarea");
 
@@ -18,7 +18,7 @@ window.onload = function () {
             try {
                 displaycom(str);
                 let table = LispExecute.Parser.Parse(str);
-                let res = obj.Run(table,window);
+                let res = obj.Run(table);
                 if(typeof res=="object") res=JSON.stringify(res);
                 displayres("> " + res);
             } catch (e) {

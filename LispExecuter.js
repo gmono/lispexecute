@@ -1,20 +1,24 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var LispExecute;
 (function (LispExecute) {
-    /**
-     * 提供顶层环境和外部接口
-     */
-    var Lisp = (function () {
-        function Lisp(initstate) {
-            this.TopContainer = new Map();
-            //先加入预定义符号 加减乘除等
-            this.AddPreSymbols();
-            if (initstate != null)
-                for (var _i = 0, initstate_1 = initstate; _i < initstate_1.length; _i++) {
-                    var t = initstate_1[_i];
-                    this.SetSymbol(t);
-                }
+    var LispExecuter = (function (_super) {
+        __extends(LispExecuter, _super);
+        function LispExecuter() {
+            return _super !== null && _super.apply(this, arguments) || this;
         }
-        Lisp.prototype.AddPreSymbols = function () {
+        //此处约定
+        //非普通js函数语义的 一律不使用提前计算参数和
+        //但是可以使用转化标记
+        LispExecuter.prototype.AddPreSymbols = function () {
             this.SetSymbol({ key: '+', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
@@ -167,7 +171,7 @@ var LispExecute;
                     }
                     return true;
                 } });
-            this.SetSymbol({ key: 'do', isneedcircum: true, callthis: null, isneedcal: false, val: function (circum) {
+            this.SetSymbol({ key: 'do', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -181,26 +185,44 @@ var LispExecute;
                     }
                     return ret.Calculate(circum);
                 } });
-            this.SetSymbol({ key: 'define', isneedcircum: true, callthis: null, isneedcal: false, val: function (circum) {
+            this.SetSymbol({ key: 'define', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
                     }
-                    //这里来构造一个process
-                    //先构造body
-                    var bodylist = args.slice(1, args.length); //得到body序列
-                    //合成一个body
-                    var body = new LispExecute.Table();
-                    body.childs.push(new LispExecute.LispSymbolRefence("do")); //使用do操作符连接多个table
-                    body.childs = body.childs.concat(bodylist);
-                    var def = new LispExecute.Table();
-                    def.childs[0] = args[0];
-                    def.childs[1] = body;
-                    var proc = new LispExecute.LispDefProcess(def);
-                    //加入环境
-                    circum(proc.Name, proc);
+                    //判断定义类型 如果def部分为normal表则为过程定义
+                    //否则则为变量定义
+                    //注意define操作符不返回值 即返回undefined
+                    if (args.length < 2)
+                        throw new Error("定义错误！参数数量不正确");
+                    var head = args[0];
+                    if (head.Type == "symbol") {
+                        //变量定义
+                        if (args.length > 2)
+                            throw new Error("变量定义形式错误！参数数量不正确");
+                        var val = args[1];
+                        circum.Set(head.name, val);
+                        return undefined;
+                    }
+                    if (head.Type == "normal") {
+                        //这里来构造一个process
+                        //先构造body
+                        var bodylist = args.slice(1, args.length); //得到body序列
+                        //合成一个body
+                        var body = new LispExecute.Table();
+                        body.childs.push(new LispExecute.LispSymbolRefence("do")); //使用do操作符连接多个table
+                        body.childs = body.childs.concat(bodylist);
+                        var def = new LispExecute.Table();
+                        def.childs[0] = args[0];
+                        def.childs[1] = body;
+                        var proc = new LispExecute.LispDefProcess(def);
+                        //加入环境
+                        circum.Set(proc.Name, proc);
+                        return undefined;
+                    }
+                    throw new Error("符号定义错误！头部类型不正确");
                 } });
-            this.SetSymbol({ key: 'if', isneedcircum: true, callthis: null, isneedcal: false, val: function (circum) {
+            this.SetSymbol({ key: 'if', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -229,103 +251,19 @@ var LispExecute;
                     else
                         return undefined;
                 } });
-        };
-        /**
-         * 设置一个符号 可以覆盖
-         * @param sym 符号
-         */
-        Lisp.prototype.SetSymbol = function (sym) {
-            this.TopContainer.set(sym.key, this.ToTable(sym));
-        };
-        /**
-         * 获取一个符号代表的变量 自动类型转换
-         * @param name 获取的变量的名字
-         */
-        Lisp.prototype.GetSymbol = function (name) {
-            if (!this.TopContainer.has(name))
-                return null;
-            var obj = this.TopContainer.get(name);
-            return this.ToRaw(obj);
-        };
-        Lisp.prototype.ToRaw = function (obj) {
-            if (obj.Type == "object") {
-                var oobj = obj;
-                return oobj.Object;
-            }
-            else if (obj instanceof LispExecute.LispRawProcess) {
-                var fun = obj;
-                return fun.rawFunc;
-            }
-            //不需要转换就直接返回
-            return obj;
-        };
-        /**
-         * 此处sympair中仅val和函数专属的属性有效key可以为null
-         * @param sym 符号 key无用
-         */
-        Lisp.prototype.ToTable = function (sym) {
-            //如果val是object就转换为Table
-            if (sym.val instanceof LispExecute.Table) {
-                //如果是表就直接加入 否则封装为LispObject
-                return sym.val;
-            }
-            else if (typeof sym.val == "function") {
-                //封装函数
-                var fun = sym.val;
-                var func = new LispExecute.LispRawProcess(fun.name, fun, sym.isneedcircum, sym.callthis, sym.isneedcal);
-                return func;
-            }
-            else {
-                var lobj = new LispExecute.LispObject(sym.val);
-                return lobj;
-            }
-        };
-        /**
-         *
-         * @param obj 要计算的顶层表
-         * @param link 要链接到的js顶层对象
-         */
-        Lisp.prototype.Run = function (obj, link) {
-            var _this = this;
-            var func = function (name, val) {
-                if (val == null) {
-                    if (_this.TopContainer.has(name))
-                        return _this.TopContainer.get(name);
-                    if (link != null) {
-                        var now = link;
-                        var old = void 0;
-                        var paths = name.split('.');
-                        var isok = true; //是否成功找到
-                        for (var i = 0; i < paths.length; ++i) {
-                            old = now;
-                            now = now[paths[i]];
-                            if (now == null) {
-                                isok = false;
-                                break;
-                            }
-                        }
-                        if (isok) {
-                            if (typeof now == "function") {
-                                var func_1 = now;
-                                var proc = new LispExecute.LispRawProcess(func_1.name, func_1, false, old, true, true);
-                                return proc;
-                            }
-                            else {
-                                //构造普通对象
-                                var ret_1 = new LispExecute.LispObject(now);
-                                return ret_1;
-                            }
-                        }
+            this.SetSymbol({ key: 'typeof', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
                     }
-                    return undefined;
-                }
-                _this.TopContainer.set(name, val);
-            };
-            var ret = obj.Calculate(func);
-            return this.ToRaw(ret);
+                    if (args.length != 1)
+                        throw "参数数量错误！";
+                    return args[0].Calculate(circum).Type;
+                    //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
+                } });
         };
-        return Lisp;
-    }());
-    LispExecute.Lisp = Lisp;
+        return LispExecuter;
+    }(LispExecute.Executer));
+    LispExecute.LispExecuter = LispExecuter;
 })(LispExecute || (LispExecute = {}));
-//# sourceMappingURL=LispExecute.js.map
+//# sourceMappingURL=LispExecuter.js.map
