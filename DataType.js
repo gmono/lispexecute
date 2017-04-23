@@ -99,10 +99,7 @@ var LispExecute;
                 return this;
             //得到第一个子表 此表必须是一个符号引用
             var sym = this.childs[0];
-            if (sym.type != "symbol") {
-                throw new Error("计算错误，计算表第一个元素必须是符号引用");
-            }
-            //得到符号引用 找到符号实体 调用符号实体的Call
+            //对表求值 得到一个process而不管其如何得到
             var func = sym.Calculate(circum);
             if (func.type == "process") {
                 //构造参数表
@@ -112,7 +109,7 @@ var LispExecute;
                 return func.Call(circum, pars);
             }
             //如果不是process则错误
-            throw new Error("错误，计算式必须引用一个过程");
+            throw new Error("错误，只能对过程执行计算!");
         };
         return Table;
     }());
@@ -240,7 +237,7 @@ var LispExecute;
             configurable: true
         });
         LispDefProcess.prototype.Calculte = function (circum) {
-            throw new Error("错误，不能直接计算Process表,应使用Call方法调用");
+            return this;
         };
         /**
         * 此为过程调用
@@ -364,6 +361,9 @@ var LispExecute;
             }
             //注意这里处理函数的方法
             //采用默认参数 也就是this对象为null不提供环境 先计算参数(应用序 常规过程调用模式)
+        };
+        LispRawProcess.prototype.Calculate = function (circum) {
+            return this;
         };
         return LispRawProcess;
     }(LispProcess));

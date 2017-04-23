@@ -86,11 +86,7 @@ namespace LispExecute {
             if (this.childs == null || this.childs.length == 0) return this;
             //得到第一个子表 此表必须是一个符号引用
             let sym: LispSymbolRefence = this.childs[0] as LispSymbolRefence;
-            if (sym.type != "symbol")
-            {
-                throw new Error("计算错误，计算表第一个元素必须是符号引用");
-            }
-            //得到符号引用 找到符号实体 调用符号实体的Call
+            //对表求值 得到一个process而不管其如何得到
             let func: LispProcess = sym.Calculate(circum) as LispProcess;
             if (func.type == "process")
             {
@@ -101,7 +97,7 @@ namespace LispExecute {
                 return func.Call(circum, pars);
             }
             //如果不是process则错误
-            throw new Error("错误，计算式必须引用一个过程");
+            throw new Error("错误，只能对过程执行计算!");
         }
 
     }
@@ -207,7 +203,7 @@ namespace LispExecute {
         }
         public Calculte(circum: Circumstance): Table
         {
-            throw new Error("错误，不能直接计算Process表,应使用Call方法调用");
+            return this;
         }
          /**
          * 此为过程调用
@@ -328,6 +324,11 @@ namespace LispExecute {
         {
             super();
             this.type="process";
+        }
+
+        public Calculate(circum:Circumstance)
+        {
+            return this;
         }
         
     }
