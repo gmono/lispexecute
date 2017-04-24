@@ -234,6 +234,39 @@ namespace LispExecute
                     let proc=new LispDefProcess(def);
                     return proc;
             }});
+            this.SetSymbol(<SymPair>{key:'prop',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let temp=(<Table>args[0]).Calculate(circum);
+                if(temp.Type=="object")
+                {
+                    //数据对象进行取属性计算
+                    let obj=(<LispObject>temp).Object;
+                    let tt=<Table>args[1];
+                    let name;
+                    if(tt.Type=="symbol")
+                    {
+                        name=(<LispSymbolRefence>tt).name;
+                    }
+                    else if(tt.Type=="object")
+                    {
+                        name=(<LispObject>tt).Object;
+                    }
+                    else throw new Error("错误！属性名必须为字符串或符号引用");
+                    if(name in obj)
+                    {
+                        return new LispObject(obj[name]);
+                    }
+                }
+            }});
+            this.SetSymbol(<SymPair>{key:'funcof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                let temp=<Table>args[0];
+                if(temp.Type=="object"&&typeof (<LispObject>temp).Object=="function")
+                {
+                    return new LispRawProcess("",(<LispObject>temp).Object,false);
+                }
+            }});
+            
         }
     }
 }

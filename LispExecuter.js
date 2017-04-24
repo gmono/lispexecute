@@ -317,6 +317,44 @@ var LispExecute;
                     var proc = new LispExecute.LispDefProcess(def);
                     return proc;
                 } });
+            this.SetSymbol({ key: 'prop', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var temp = args[0].Calculate(circum);
+                    if (temp.Type == "object") {
+                        //数据对象进行取属性计算
+                        var obj = temp.Object;
+                        var tt = args[1];
+                        var name = void 0;
+                        if (tt.Type == "symbol") {
+                            name = tt.name;
+                        }
+                        else if (tt.Type == "object") {
+                            name = tt.Object;
+                        }
+                        else
+                            throw new Error("错误！属性名必须为字符串或符号引用");
+                        if (name in obj) {
+                            return new LispExecute.LispObject(obj[name]);
+                        }
+                    }
+                } });
+            this.SetSymbol({ key: 'funcof', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 1)
+                        throw "参数数量错误！";
+                    var temp = args[0];
+                    if (temp.Type == "object" && typeof temp.Object == "function") {
+                        return new LispExecute.LispRawProcess("", temp.Object, false);
+                    }
+                } });
         };
         return LispExecuter;
     }(LispExecute.Executer));
