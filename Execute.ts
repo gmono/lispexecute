@@ -20,9 +20,25 @@ namespace LispExecute
         {
             let ret=super.TrySearch(name);
             if(ret!=undefined) return ret;
-            if(this.LinkObject!=null&&name in this.LinkObject)
+            //分解名字
+
+            if(this.LinkObject!=null)
             {
-                return new LispObject(this.LinkObject[name]);
+                let paths=name.split('.');
+                let now=this.LinkObject;
+                let old;
+                for(let t of paths)
+                {
+                    old=now;
+                    now=now[t];
+                    if(now==null)
+                    {
+                        return undefined;
+                    }
+                }
+                if(typeof now!="function")
+                    return new LispObject(this.LinkObject[name]);
+                else return new LispRawProcess(name,now,false,old);
             }
             return undefined;
             

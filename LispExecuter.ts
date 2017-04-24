@@ -188,6 +188,17 @@ namespace LispExecute
                 //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
   
             }});
+            this.SetSymbol(<SymPair>{key:'objtype',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                let temp=(<Table>args[0]).Calculate(circum);
+                if(temp.Type=="object")
+                {
+                    return new LispObject(typeof (<LispObject>temp).Object);
+                }
+                throw new Error("错误！只能对数据对象使用objtype操作符");
+                //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
+  
+            }});
             this.SetSymbol(<SymPair>{key:'quote',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return args[0];

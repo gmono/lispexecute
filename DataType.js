@@ -60,6 +60,18 @@ var LispExecute;
                 this.Set(name, value);
             }
         };
+        /**
+         * Delete一个符号
+         * @param isthrow 是否向上级传递如果这级找不到的话
+         */
+        Circumstance.prototype.Delete = function (name, isthrow) {
+            if (this.selfmap.has(name)) {
+                this.selfmap.delete(name);
+            }
+            else if (isthrow && this.supercir != null) {
+                this.supercir.Delete(name, isthrow);
+            }
+        };
         return Circumstance;
     }());
     LispExecute.Circumstance = Circumstance;
@@ -277,6 +289,7 @@ var LispExecute;
     /**
      * 此为用于链接RawProcess与内部环境的环境
      * 此环境为一个链接层 本身并不保存任何符号
+     * 这个链接层 不是每个原生过程都需要
      * 因此这里的trysearch和set都直接链接
      */
     var RawCircum = (function (_super) {
@@ -332,7 +345,8 @@ var LispExecute;
         }
         LispRawProcess.prototype.Call = function (circum, pars) {
             //构造链接层
-            var thiscircum = new RawCircum(circum, this);
+            // let thiscircum=new RawCircum(circum,this);
+            var thiscircum = circum;
             //转换参数
             var rarr = [];
             if (this.IsNeedCircum)

@@ -52,6 +52,20 @@ namespace LispExecute {
                 this.Set(name,value);
             }
         }
+        /**
+         * Delete一个符号
+         * @param isthrow 是否向上级传递如果这级找不到的话
+         */
+        public Delete(name:string,isthrow:boolean) {
+            if(this.selfmap.has(name))
+            {
+                this.selfmap.delete(name);
+            }
+            else if(isthrow&&this.supercir!=null)
+            {
+                this.supercir.Delete(name,isthrow);
+            }
+        }
     }
     /**
      * 基本数据类型：表
@@ -244,6 +258,7 @@ namespace LispExecute {
 /**
  * 此为用于链接RawProcess与内部环境的环境
  * 此环境为一个链接层 本身并不保存任何符号
+ * 这个链接层 不是每个原生过程都需要
  * 因此这里的trysearch和set都直接链接
  */
     class RawCircum extends Circumstance
@@ -281,7 +296,8 @@ namespace LispExecute {
             public Call(circum: Circumstance, pars: Table): Table
             {
                 //构造链接层
-                let thiscircum=new RawCircum(circum,this);
+                // let thiscircum=new RawCircum(circum,this);
+                let thiscircum=circum;
                 //转换参数
                 let rarr=[];
                 if(this.IsNeedCircum) rarr.push(thiscircum);

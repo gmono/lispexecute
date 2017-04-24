@@ -22,8 +22,23 @@ var LispExecute;
             var ret = _super.prototype.TrySearch.call(this, name);
             if (ret != undefined)
                 return ret;
-            if (this.LinkObject != null && name in this.LinkObject) {
-                return new LispExecute.LispObject(this.LinkObject[name]);
+            //分解名字
+            if (this.LinkObject != null) {
+                var paths = name.split('.');
+                var now = this.LinkObject;
+                var old = void 0;
+                for (var _i = 0, paths_1 = paths; _i < paths_1.length; _i++) {
+                    var t = paths_1[_i];
+                    old = now;
+                    now = now[t];
+                    if (now == null) {
+                        return undefined;
+                    }
+                }
+                if (typeof now != "function")
+                    return new LispExecute.LispObject(this.LinkObject[name]);
+                else
+                    return new LispExecute.LispRawProcess(name, now, false, old);
             }
             return undefined;
         };
