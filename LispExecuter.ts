@@ -241,15 +241,12 @@ namespace LispExecute
                 {
                     //数据对象进行取属性计算
                     let obj=(<LispObject>temp).Object;
-                    let tt=<Table>args[1];
+                    let pname=args[1] as Table;
+                    pname=pname.Calculate(circum);
                     let name;
-                    if(tt.Type=="symbol")
+                    if(pname.Type=="object")
                     {
-                        name=(<LispSymbolRefence>tt).name;
-                    }
-                    else if(tt.Type=="object")
-                    {
-                        name=(<LispObject>tt).Object;
+                        name=(<LispObject>pname).Object;
                     }
                     else throw new Error("错误！属性名必须为字符串或符号引用");
                     if(name in obj)
@@ -265,6 +262,15 @@ namespace LispExecute
                 {
                     return new LispRawProcess("",(<LispObject>temp).Object,false);
                 }
+            }});
+            this.SetSymbol(<SymPair>{key:'strof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                let temp=<LispSymbolRefence>args[0];
+                if(temp.Type=="symbol")
+                {
+                    return new LispObject(temp.name);
+                }
+                throw new Error("只能对符号执行字符串化!");
             }});
             
         }

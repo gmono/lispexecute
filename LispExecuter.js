@@ -328,13 +328,11 @@ var LispExecute;
                     if (temp.Type == "object") {
                         //数据对象进行取属性计算
                         var obj = temp.Object;
-                        var tt = args[1];
+                        var pname = args[1];
+                        pname = pname.Calculate(circum);
                         var name = void 0;
-                        if (tt.Type == "symbol") {
-                            name = tt.name;
-                        }
-                        else if (tt.Type == "object") {
-                            name = tt.Object;
+                        if (pname.Type == "object") {
+                            name = pname.Object;
                         }
                         else
                             throw new Error("错误！属性名必须为字符串或符号引用");
@@ -354,6 +352,19 @@ var LispExecute;
                     if (temp.Type == "object" && typeof temp.Object == "function") {
                         return new LispExecute.LispRawProcess("", temp.Object, false);
                     }
+                } });
+            this.SetSymbol({ key: 'strof', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 1)
+                        throw "参数数量错误！";
+                    var temp = args[0];
+                    if (temp.Type == "symbol") {
+                        return new LispExecute.LispObject(temp.name);
+                    }
+                    throw new Error("只能对符号执行字符串化!");
                 } });
         };
         return LispExecuter;
