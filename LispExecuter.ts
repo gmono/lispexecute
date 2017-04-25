@@ -112,7 +112,7 @@ namespace LispExecute
                 }
                 return true;
             }});
-            this.SetSymbol(<SymPair>{key:'do',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'do',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //此过程对接收的每个参数求值 后返回最后一个求值的结果
                 //此过程用于将多个Table联合在一起作为一个Table求值
                 let ret:Table;
@@ -122,7 +122,7 @@ namespace LispExecute
                 }
                 return ret.Calculate(circum);
             }});
-            this.SetSymbol(<SymPair>{key:'define',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'define',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //判断定义类型 如果def部分为normal表则为过程定义
                 //否则则为变量定义
                 //注意define操作符不返回值 即返回undefined
@@ -157,7 +157,7 @@ namespace LispExecute
                 throw new Error("符号定义错误！头部类型不正确");
 
             }});
-            this.SetSymbol(<SymPair>{key:'if',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'if',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //这里来判断条件
                 if(args.length<2) throw new Error("错误！IF操作参数过少！");
                 let p=args[0] as Table;
@@ -182,13 +182,13 @@ namespace LispExecute
                 }
                 else return undefined;
             }});
-            this.SetSymbol(<SymPair>{key:'typeof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'typeof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return (<Table>args[0]).Calculate(circum).Type;
                 //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
   
             }});
-            this.SetSymbol(<SymPair>{key:'objtype',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'objtype',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=(<Table>args[0]).Calculate(circum);
                 if(temp.Type=="object")
@@ -199,11 +199,11 @@ namespace LispExecute
                 //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
   
             }});
-            this.SetSymbol(<SymPair>{key:'quote',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'quote',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return args[0];
             }});
-            this.SetSymbol(<SymPair>{key:'lambda',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'lambda',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //判断定义类型 如果def部分为normal表则为过程定义
                 //否则则为变量定义
                 //注意define操作符不返回值 即返回undefined
@@ -234,7 +234,7 @@ namespace LispExecute
                     let proc=new LispDefProcess(def);
                     return proc;
             }});
-            this.SetSymbol(<SymPair>{key:'prop',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'prop',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let temp=(<Table>args[0]).Calculate(circum);
                 if(temp.Type=="object")
@@ -258,7 +258,7 @@ namespace LispExecute
                     }
                 }
             }});
-            this.SetSymbol(<SymPair>{key:'funcof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Circumstance,...args)=>{
+            this.SetSymbol(<SymPair>{key:'funcof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<Table>args[0];
                 if(temp.Type=="object"&&typeof (<LispObject>temp).Object=="function")

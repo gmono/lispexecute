@@ -15,8 +15,8 @@ var LispExecute;
      * 一般来说 子类只需要重写TrySearch方法和 TrySet方法即可即可
      * TrySearch中进行具体操作 TrySet中进行存在检测
      */
-    var Circumstance = (function () {
-        function Circumstance(supercir) {
+    var Store = (function () {
+        function Store(supercir) {
             if (supercir === void 0) { supercir = null; }
             this.supercir = supercir;
             this.selfmap = new Map();
@@ -25,7 +25,7 @@ var LispExecute;
          * 搜索一个符号 搜索不到抛出错误
          * @param name 符号名
          */
-        Circumstance.prototype.Search = function (name) {
+        Store.prototype.Search = function (name) {
             var ret = this.TrySearch(name);
             if (ret == undefined)
                 throw new Error("符号引用错误！");
@@ -35,7 +35,7 @@ var LispExecute;
          * 搜索一个符号 搜索不到返回undefined
          * @param name 符号名
          */
-        Circumstance.prototype.TrySearch = function (name) {
+        Store.prototype.TrySearch = function (name) {
             if (this.selfmap.has(name))
                 return this.selfmap.get(name);
             if (this.supercir != null)
@@ -47,7 +47,7 @@ var LispExecute;
          * @param name 符号名
          * @param value 新符号值
          */
-        Circumstance.prototype.Set = function (name, value) {
+        Store.prototype.Set = function (name, value) {
             this.selfmap.set(name, value);
         };
         /**
@@ -55,7 +55,7 @@ var LispExecute;
          * @param name 符号名
          * @param value 新值
          */
-        Circumstance.prototype.TrySet = function (name, value) {
+        Store.prototype.TrySet = function (name, value) {
             if (this.TrySearch(name) == undefined) {
                 this.Set(name, value);
             }
@@ -64,7 +64,7 @@ var LispExecute;
          * Delete一个符号
          * @param isthrow 是否向上级传递如果这级找不到的话
          */
-        Circumstance.prototype.Delete = function (name, isthrow) {
+        Store.prototype.Delete = function (name, isthrow) {
             if (this.selfmap.has(name)) {
                 this.selfmap.delete(name);
             }
@@ -72,9 +72,9 @@ var LispExecute;
                 this.supercir.Delete(name, isthrow);
             }
         };
-        return Circumstance;
+        return Store;
     }());
-    LispExecute.Circumstance = Circumstance;
+    LispExecute.Store = Store;
     /**
      * 基本数据类型：表
      * 此表为通用表 特殊表可以有自己专属的方法 供装饰内部符号使用
@@ -268,7 +268,7 @@ var LispExecute;
         */
         LispDefProcess.prototype.Call = function (circum, pars) {
             //构造此层搜索函数和环境
-            var searfun = new Circumstance(circum);
+            var searfun = new Store(circum);
             //添加自身
             searfun.Set("this", this);
             //将参数加入环境
@@ -312,7 +312,7 @@ var LispExecute;
             return this.supercir.Set(name, value);
         };
         return RawCircum;
-    }(Circumstance));
+    }(Store));
     ;
     /**
      * 特殊过程：原生过程

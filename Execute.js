@@ -43,7 +43,7 @@ var LispExecute;
             return undefined;
         };
         return LinkContainer;
-    }(LispExecute.Circumstance));
+    }(LispExecute.Store));
     LispExecute.LinkContainer = LinkContainer;
     /**
      * 提供顶层环境和外部接口

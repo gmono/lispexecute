@@ -10,7 +10,7 @@ namespace LispExecute
         isneedcal?:boolean;
         isneedtrans?:boolean;
     }
-    export class LinkContainer extends Circumstance
+    export class LinkContainer extends Store
     {
         public constructor(public LinkObject:any=null)
         {

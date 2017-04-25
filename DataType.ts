@@ -4,10 +4,10 @@ namespace LispExecute {
      * 一般来说 子类只需要重写TrySearch方法和 TrySet方法即可即可
      * TrySearch中进行具体操作 TrySet中进行存在检测
      */
-    export class Circumstance
+    export class Store
     {
         protected selfmap:Map<string,Table>=new Map<string,Table>();
-        public constructor(protected supercir:Circumstance=null)
+        public constructor(protected supercir:Store=null)
         {
         }
         /**
@@ -95,7 +95,7 @@ namespace LispExecute {
          * 复合表会计算后返回
          * 以下过程说明 对于常规（复合）表而言 计算就是过程调用
          */
-        public Calculate(circum: Circumstance): Table
+        public Calculate(circum: Store): Table
         {
             if (this.childs == null || this.childs.length == 0) return this;
             //得到第一个子表 此表必须是一个符号引用
@@ -136,7 +136,7 @@ namespace LispExecute {
             this.Object=value;
             this.type="object";
         }
-        public Calculate(circum: Circumstance): Table
+        public Calculate(circum: Store): Table
         {
             return this;
         }
@@ -157,7 +157,7 @@ namespace LispExecute {
          * 根据自身符号从环境中找到Table然后返回
          * @param circum 环境
          */
-        public Calculate(circum: Circumstance): Table
+        public Calculate(circum: Store): Table
         {
             let ret = circum.Search(this.name);
             if (ret == null) throw new Error("符号引用错误！不存在这样的符号！");
@@ -167,7 +167,7 @@ namespace LispExecute {
     export abstract class LispProcess extends Table
     {
 
-        public abstract Call(circum: Circumstance, pars: Table): Table;
+        public abstract Call(circum: Store, pars: Table): Table;
         public abstract get Name(): string;
     }
     /**
@@ -222,7 +222,7 @@ namespace LispExecute {
         {
             return this.self.childs[1];
         }
-        public Calculte(circum: Circumstance): Table
+        public Calculte(circum: Store): Table
         {
             return this;
         }
@@ -233,10 +233,10 @@ namespace LispExecute {
          * @param circum 上层环境
          * @param pars 参数表 取其childs对形参表做替换
          */
-        public Call(circum: Circumstance, pars: Table): Table
+        public Call(circum: Store, pars: Table): Table
         {
             //构造此层搜索函数和环境
-            let searfun=new Circumstance(circum);
+            let searfun=new Store(circum);
             //添加自身
             searfun.Set("this",this);
             //将参数加入环境
@@ -261,9 +261,9 @@ namespace LispExecute {
  * 这个链接层 不是每个原生过程都需要
  * 因此这里的trysearch和set都直接链接
  */
-    class RawCircum extends Circumstance
+    class RawCircum extends Store
     {
-        public constructor(circum:Circumstance,protected rfuncbody:LispRawProcess)
+        public constructor(circum:Store,protected rfuncbody:LispRawProcess)
         {
             super(circum);
         }
@@ -293,7 +293,7 @@ namespace LispExecute {
     export class LispRawProcess extends LispProcess
     {
 
-            public Call(circum: Circumstance, pars: Table): Table
+            public Call(circum: Store, pars: Table): Table
             {
                 //构造链接层
                 // let thiscircum=new RawCircum(circum,this);
@@ -349,7 +349,7 @@ namespace LispExecute {
             this.type="process";
         }
 
-        public Calculate(circum:Circumstance)
+        public Calculate(circum:Store)
         {
             return this;
         }
