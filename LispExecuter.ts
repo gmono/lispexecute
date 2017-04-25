@@ -253,6 +253,8 @@ namespace LispExecute
                     {
                         return new LispObject(obj[name]);
                     }
+                    //调试用
+                    throw new Error(`错误！指定对象中不存在属性：${name}`);
                 }
             }});
             this.SetSymbol(<SymPair>{key:'funcof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{

@@ -339,6 +339,8 @@ var LispExecute;
                         if (name in obj) {
                             return new LispExecute.LispObject(obj[name]);
                         }
+                        //调试用
+                        throw new Error("\u9519\u8BEF\uFF01\u6307\u5B9A\u5BF9\u8C61\u4E2D\u4E0D\u5B58\u5728\u5C5E\u6027\uFF1A" + name);
                     }
                 } });
             this.SetSymbol({ key: 'funcof', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
