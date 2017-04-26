@@ -317,6 +317,21 @@ var LispExecute;
                     var proc = new LispExecute.LispDefProcess(def);
                     return proc;
                 } });
+            this.SetSymbol({ key: 'atom', isneedcircum: false, callthis: null, isneedcal: true, isneedtrans: false, val: function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    if (args.length != 1)
+                        throw "参数数量错误！";
+                    var temp = args[0];
+                    if (temp.Type == "object") {
+                        return new LispExecute.LispObject(true);
+                    }
+                    else
+                        return new LispExecute.LispObject(false);
+                } });
+            //下面为原生对象操作
             this.SetSymbol({ key: 'prop', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {

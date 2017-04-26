@@ -234,6 +234,16 @@ namespace LispExecute
                     let proc=new LispDefProcess(def);
                     return proc;
             }});
+             this.SetSymbol(<SymPair>{key:'atom',isneedcircum:false,callthis:null,isneedcal:true,isneedtrans:false,val:(...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                let temp=<Table>args[0];
+                if(temp.Type=="object")
+                {
+                    return new LispObject(true);
+                }
+                else return new LispObject(false);
+            }});
+            //下面为原生对象操作
             this.SetSymbol(<SymPair>{key:'prop',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let temp=(<Table>args[0]).Calculate(circum);
