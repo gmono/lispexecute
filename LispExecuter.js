@@ -275,6 +275,7 @@ var LispExecute;
                     throw new Error("错误！只能对数据对象使用objtype操作符");
                     //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
                 } });
+            //直接返回表本身（用于提供不计算通道）
             this.SetSymbol({ key: 'quote', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
@@ -317,6 +318,7 @@ var LispExecute;
                     var proc = new LispExecute.LispDefProcess(def);
                     return proc;
                 } });
+            //判断是否为基础数据类型 即是否为object型表
             this.SetSymbol({ key: 'atom', isneedcircum: false, callthis: null, isneedcal: true, isneedtrans: false, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
@@ -358,7 +360,8 @@ var LispExecute;
                         throw new Error("\u9519\u8BEF\uFF01\u6307\u5B9A\u5BF9\u8C61\u4E2D\u4E0D\u5B58\u5728\u5C5E\u6027\uFF1A" + name);
                     }
                 } });
-            this.SetSymbol({ key: 'funcof', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            //将一个function数据对象变成一个process
+            this.SetSymbol({ key: 'proc', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -370,7 +373,8 @@ var LispExecute;
                         return new LispExecute.LispRawProcess("", temp.Object, false);
                     }
                 } });
-            this.SetSymbol({ key: 'strof', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            //取一个符号的名字
+            this.SetSymbol({ key: 'symn', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];

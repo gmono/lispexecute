@@ -199,6 +199,7 @@ namespace LispExecute
                 //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
   
             }});
+            //直接返回表本身（用于提供不计算通道）
             this.SetSymbol(<SymPair>{key:'quote',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return args[0];
@@ -234,6 +235,7 @@ namespace LispExecute
                     let proc=new LispDefProcess(def);
                     return proc;
             }});
+            //判断是否为基础数据类型 即是否为object型表
              this.SetSymbol(<SymPair>{key:'atom',isneedcircum:false,callthis:null,isneedcal:true,isneedtrans:false,val:(...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<Table>args[0];
@@ -267,7 +269,8 @@ namespace LispExecute
                     throw new Error(`错误！指定对象中不存在属性：${name}`);
                 }
             }});
-            this.SetSymbol(<SymPair>{key:'funcof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            //将一个function数据对象变成一个process
+            this.SetSymbol(<SymPair>{key:'proc',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<Table>args[0];
                 if(temp.Type=="object"&&typeof (<LispObject>temp).Object=="function")
@@ -275,7 +278,9 @@ namespace LispExecute
                     return new LispRawProcess("",(<LispObject>temp).Object,false);
                 }
             }});
-            this.SetSymbol(<SymPair>{key:'strof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+
+            //取一个符号的名字
+            this.SetSymbol(<SymPair>{key:'symn',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<LispSymbolRefence>args[0];
                 if(temp.Type=="symbol")
