@@ -132,6 +132,10 @@ namespace LispExecute
                     isok=true;
                     break;
                 }
+                else if(c=="'")
+                {
+                    //S表达式读取将Table包装为一个Object
+                }
                 else
                 {
                     //普通字面量

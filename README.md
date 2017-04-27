@@ -34,3 +34,7 @@ DateType核心提供了很方便的对外部函数进行封装的RawProcess类�
 同时对对象提供基础操作支持 可能包括上述的层次语法 
 ## 遥远的展望
 将Table和普通JS对象提供完全相同的访问接口 这样就可以实现真正的数据程序一体化
+## 重新规划
+首先Table是作为程序的表，而数据全都是LispObject，LispObject可以接受任何数据对象，当然也包括Table，将数据和程序互相转换也就是将LispObject包装的Table和Table类型之间互相转换，通过特定操作符实现
+## 第二规划
+第二种规划，是不区分Object和Table 因为Object本身也继承于Table，LispObject为原子表，即object型，Table为复合表，即normal型，Table只是可以被计算，但是否计算，由程序解释器内部决定
