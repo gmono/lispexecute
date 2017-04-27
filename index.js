@@ -22,6 +22,7 @@ window.onload = function () {
                 displayres("> " + res);
             } catch (e) {
                 displayres(e);
+                throw e;
             }
 
         }

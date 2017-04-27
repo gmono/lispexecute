@@ -138,7 +138,7 @@ var LispExecute;
                     var quotetable = new LispExecute.Table();
                     quotetable.childs.push(new LispExecute.LispSymbolRefence("quote"));
                     quotetable.childs.push(table.obj);
-                    ptr = table.nowptr;
+                    ptr = table.nowptr - 1; //同样为了平衡循环增量;
                     container.childs.push(quotetable);
                 }
                 else {

@@ -107,8 +107,10 @@ var LispExecute;
          * 以下过程说明 对于常规（复合）表而言 计算就是过程调用
          */
         Table.prototype.Calculate = function (circum) {
-            if (this.childs == null || this.childs.length == 0)
-                return this;
+            if (this.childs == null || this.childs.length == 0) {
+                //不可计算 抛出错误
+                throw new Error("错误！不可计算空表");
+            }
             //得到第一个子表 此表必须是一个符号引用
             var sym = this.childs[0];
             // while(sym.type!="process"&&sym.type!="object")

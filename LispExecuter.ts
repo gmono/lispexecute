@@ -7,6 +7,15 @@ namespace LispExecute
         //但是可以使用转化标记
         protected AddPreSymbols()
         {
+            let istrue=(tb:Table)=>
+            {
+                //检查计算的结果是否为真
+                //非false则为true   
+                //空表为false
+                if(tb.Type=="normal"&&tb.childs.length==0) return false;
+                if(tb.Type=="object"&&(<LispObject>tb).Object==false) return false;
+                return true;
+            }
             this.SetSymbol(<SymPair>{key:'+',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
                 if(typeof args[0]!="number"&&typeof args[0]!="string") throw new Error("错误！运算对象类型错误！");
                 let sum=typeof args[0] =="number"? 0:"";
@@ -112,6 +121,16 @@ namespace LispExecute
                 }
                 return true;
             }});
+
+
+            //工具函数将几个表链接成一个do引导的执行列表
+            let linkfunc=(tabs:Table[])=>
+            {
+                let ret:Table=new Table();
+                ret.childs=(<Table[]>[new LispSymbolRefence('do')]).concat(tabs);
+                return ret;
+            }
+            //将几个表连接起来
             this.SetSymbol(<SymPair>{key:'do',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //此过程对接收的每个参数求值 后返回最后一个求值的结果
                 //此过程用于将多个Table联合在一起作为一个Table求值
@@ -143,9 +162,7 @@ namespace LispExecute
                     let bodylist=args.slice(1,args.length);//得到body序列
 
                     //合成一个body
-                    let body=new Table();
-                    body.childs.push(new LispSymbolRefence("do"));//使用do操作符连接多个table
-                    body.childs=body.childs.concat(bodylist);
+                    let body=linkfunc(bodylist);
                     let def=new Table();
                     def.childs[0]=args[0];
                     def.childs[1]=body;
@@ -204,6 +221,71 @@ namespace LispExecute
                 if(args.length!=1) throw "参数数量错误！";
                 return args[0];
             }});
+            //返回表的第一个元素（如果不存在返回undefined)
+            this.SetSymbol(<SymPair>{key:'car',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                let tb=<Table>args[0];
+                return tb.childs[0];
+            }});
+            //返回剩余内容 作为表返回
+            this.SetSymbol(<SymPair>{key:'cdr',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                let tb=<Table>args[0];
+                let ret=new Table();
+                ret.childs=tb.childs.slice(1,tb.childs.length);
+                return ret;
+            }});
+            //将参数1插入到参数2（表）的头部
+            this.SetSymbol(<SymPair>{key:'cons',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let inset=<Table>args[0];
+                let tb=<Table>args[1];
+                if(tb.Type!="normal") throw new Error("错误！参数2必须为表");
+                let ret=new Table();
+                ret.childs=[inset].concat(tb.childs);
+                return ret;
+            }});
+            //分支结构
+            this.SetSymbol(<SymPair>{key:'cond',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+                let now=0;//计数器主要用于测定else合法性
+                for(let t of args)
+                {
+                    //这里处理每个测试对
+                    let temp=<Table>t;
+                    if(temp.Type!="normal"||temp.childs.length<2)
+                    {
+                        throw new Error("Cond参数错误！必须为normal表并且包含两个以上的子表！");
+                    }
+                    let testtb=temp.childs[0];
+                    //遇到结束符
+                    if(testtb.Type=="symbol"&&(<LispSymbolRefence>testtb).name=="else")
+                    {
+                        if(now!=args.length-1)
+                        {
+                            throw new Error("错误！else必须放在cond语句的最后位置");
+                        }
+                        else
+                        {
+                            //将testtb设为恒为真
+                            testtb=new LispObject(true);
+                        }
+                    }
+                    let test=testtb.Calculate(circum);
+                    //将后续的所有表都用do包装
+                    let func=linkfunc(temp.childs.slice(1,temp.childs.length));
+                    if(istrue(test))
+                    {
+                        //执行并返回
+                        //即cond遇到第一个条件为真的则直接返回
+                        let ret=func.Calculate(circum);
+                        return ret;
+                    }
+                    now++;
+                }
+                //不返回，如果没有匹配
+                return undefined;
+            }});
+            //构造一个匿名函数
             this.SetSymbol(<SymPair>{key:'lambda',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //判断定义类型 如果def部分为normal表则为过程定义
                 //否则则为变量定义
