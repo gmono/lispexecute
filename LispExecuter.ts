@@ -285,6 +285,40 @@ namespace LispExecute
                 //不返回，如果没有匹配
                 return undefined;
             }});
+            //内部数据结构比较相等
+            //对数据对象为正常js对象比较
+            //对于数据对象（非string和number）会直接比较引用
+            //要比较数据对象相等 使用deq?谓词
+            let iseq=(t1:Table,t2:Table)=>
+            {
+                if(t1.Type!=t2.Type) return false;
+                if(t1.Type=="object")
+                {
+                    return (t1 as LispObject).Object==(t2 as LispObject).Object;
+                }
+                if(t1.Type=="symbol")
+                {
+                    return (t1 as LispSymbolRefence).name==(t2 as LispSymbolRefence).name;
+                }
+                if(t1.Type=="normal")
+                {
+                    let cs:Table[]=t1.childs;
+                    let cs2:Table[]=t2.childs;
+                    if(cs.length==cs2.length)
+                    {
+                        for(let i=0;i<cs.length;++i)
+                        {
+                            if(!iseq(cs[i],cs2[i])) return false;
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            this.SetSymbol(<SymPair>{key:'eq?',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                return new LispObject(iseq(args[0],args[1]));
+            }});
             //构造一个匿名函数
             this.SetSymbol(<SymPair>{key:'lambda',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //判断定义类型 如果def部分为normal表则为过程定义
@@ -362,7 +396,7 @@ namespace LispExecute
             }});
 
             //取一个符号的名字
-            this.SetSymbol(<SymPair>{key:'symn',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'symname',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<LispSymbolRefence>args[0];
                 if(temp.Type=="symbol")
