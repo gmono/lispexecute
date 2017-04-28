@@ -315,7 +315,7 @@ namespace LispExecute
                     return false;
                 }
             }
-            this.SetSymbol(<SymPair>{key:'eq?',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'equal?',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 return new LispObject(iseq(args[0],args[1]));
             }});
@@ -405,6 +405,23 @@ namespace LispExecute
                 }
                 throw new Error("只能对符号执行字符串化!");
             }});
+            //逻辑运算符
+            this.SetSymbol(<SymPair>{key:'and',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                return new LispObject(args[0]&&args[1]);
+            }});
+            this.SetSymbol(<SymPair>{key:'or',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                return new LispObject(args[0]||args[1]);
+            }});
+            this.SetSymbol(<SymPair>{key:'not',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                return new LispObject(!args[0]);
+            }});
+            //设置别名
+            this.SetOtherName("define","let");
+            this.SetOtherName("define","set!");
+            this.SetOtherName("do","begin");
             
         }
     }

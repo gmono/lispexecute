@@ -405,7 +405,7 @@ var LispExecute;
                     return false;
                 }
             };
-            this.SetSymbol({ key: 'eq?', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'equal?', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -517,6 +517,38 @@ var LispExecute;
                     }
                     throw new Error("只能对符号执行字符串化!");
                 } });
+            //逻辑运算符
+            this.SetSymbol({ key: 'and', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    return new LispExecute.LispObject(args[0] && args[1]);
+                } });
+            this.SetSymbol({ key: 'or', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    return new LispExecute.LispObject(args[0] || args[1]);
+                } });
+            this.SetSymbol({ key: 'not', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 1)
+                        throw "参数数量错误！";
+                    return new LispExecute.LispObject(!args[0]);
+                } });
+            //设置别名
+            this.SetOtherName("define", "let");
+            this.SetOtherName("define", "set!");
+            this.SetOtherName("do", "begin");
         };
         return LispExecuter;
     }(LispExecute.Executer));

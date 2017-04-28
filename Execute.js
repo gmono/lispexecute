@@ -42,6 +42,9 @@ var LispExecute;
             }
             return undefined;
         };
+        LinkContainer.prototype.RawTrySearch = function (name) {
+            return _super.prototype.TrySearch.call(this, name);
+        };
         return LinkContainer;
     }(LispExecute.Store));
     LispExecute.LinkContainer = LinkContainer;
@@ -66,6 +69,17 @@ var LispExecute;
          */
         Executer.prototype.SetSymbol = function (sym) {
             this.TopContainer.Set(sym.key, this.ToTable(sym));
+        };
+        /**
+         * 为一个符号设置别名
+         * @param sname 原名
+         * @param nname 新名
+         */
+        Executer.prototype.SetOtherName = function (sname, nname) {
+            var obj = this.TopContainer.RawTrySearch(sname);
+            if (obj != null) {
+                this.TopContainer.Set(nname, obj);
+            }
         };
         /**
          * 获取一个符号代表的变量 自动类型转换
