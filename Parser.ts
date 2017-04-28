@@ -108,9 +108,11 @@ namespace LispExecute
                     nowval+=c;
                     continue;
                 }
+
+
+
                 if(c==" "||c=="\t")
                 {
-                    pend:
                     //这里逻辑为 如果在读取状态遇到空格意味着读取结束 
                     //否则直接跳过
                     if(isinread)
@@ -120,9 +122,13 @@ namespace LispExecute
                         nowval="";
                         isinread=false;
                     }
-                    else continue;
+                    //如果在读取表的状态就继续读取否则就读取结束
+                    if(isreadtb) continue;
+                    break;
                 }
-                else if(c=="(")
+
+
+                if(c=="(")
                 {
                     //如果第一次遇到左括号
                     //就设定正在读取表的标志 isok
@@ -136,15 +142,29 @@ namespace LispExecute
                     //这里平衡
                     ptr--;
                     container.childs.push(res.obj);
+                    continue;
                 }
-                else if(c==")")
+
+
+
+                if(c==")")
                 {
                     //处理 如果根本没有进入读取表模式
                     if(!isreadtb)
                     {
-                        break pend;
+                        //这里逻辑为 如果在读取状态遇到空格意味着读取结束 
+                        //否则直接跳过
+                        if(isinread)
+                        {
+                            let obj=this.ReadValue(nowval);
+                            container.childs.push(obj);
+                            nowval="";
+                            isinread=false;
+                        }
+                        break;
                     }
                     //如果遇到表结束
+                    //并且此时并没有读取完值
                     if(isinread)
                     {
                         let obj=this.ReadValue(nowval);
@@ -156,7 +176,9 @@ namespace LispExecute
                     isok=true;
                     break;
                 }
-                else if(c=="'")
+
+
+                if(c=="'")
                 {
                     //S表达式读取将Table包装为一个quote表
                     let table=this.ParseCode(code,ptr+1);
@@ -165,9 +187,11 @@ namespace LispExecute
                     quotetable.childs.push(table.obj);
                     ptr=table.nowptr-1 //同样为了平衡循环增量;
                     container.childs.push(quotetable);
+                    if(isreadtb) continue;
+                    break;
                 }
-                else
-                {
+                
+                ///
                     //普通字面量
                     if(!isinread)
                     {
@@ -179,7 +203,6 @@ namespace LispExecute
                         }
                     }
                     nowval+=c;
-                }
             }
             if(!isok) throw new Error("解析错误！解析过程未正常结束！");
             if(!isreadtb) return <ReadStruct>{nowptr:ptr,obj:container.childs[0]};
