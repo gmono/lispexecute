@@ -110,6 +110,7 @@ namespace LispExecute
                 }
                 if(c==" "||c=="\t")
                 {
+                    pend:
                     //这里逻辑为 如果在读取状态遇到空格意味着读取结束 
                     //否则直接跳过
                     if(isinread)
@@ -138,6 +139,11 @@ namespace LispExecute
                 }
                 else if(c==")")
                 {
+                    //处理 如果根本没有进入读取表模式
+                    if(!isreadtb)
+                    {
+                        break pend;
+                    }
                     //如果遇到表结束
                     if(isinread)
                     {
