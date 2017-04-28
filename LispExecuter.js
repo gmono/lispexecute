@@ -379,6 +379,41 @@ var LispExecute;
                     //不返回，如果没有匹配
                     return undefined;
                 } });
+            //内部数据结构比较相等
+            //对数据对象为正常js对象比较
+            //对于数据对象（非string和number）会直接比较引用
+            //要比较数据对象相等 使用deq?谓词
+            var iseq = function (t1, t2) {
+                if (t1.Type != t2.Type)
+                    return false;
+                if (t1.Type == "object") {
+                    return t1.Object == t2.Object;
+                }
+                if (t1.Type == "symbol") {
+                    return t1.name == t2.name;
+                }
+                if (t1.Type == "normal") {
+                    var cs = t1.childs;
+                    var cs2 = t2.childs;
+                    if (cs.length == cs2.length) {
+                        for (var i = 0; i < cs.length; ++i) {
+                            if (!iseq(cs[i], cs2[i]))
+                                return false;
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            this.SetSymbol({ key: 'eq?', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    return new LispExecute.LispObject(iseq(args[0], args[1]));
+                } });
             //构造一个匿名函数
             this.SetSymbol({ key: 'lambda', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
@@ -469,7 +504,7 @@ var LispExecute;
                     }
                 } });
             //取一个符号的名字
-            this.SetSymbol({ key: 'symn', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'symname', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
