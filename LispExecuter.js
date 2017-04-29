@@ -564,6 +564,121 @@ var LispExecute;
                         throw "参数数量错误！";
                     return new LispExecute.LispObject(!args[0]);
                 } });
+            //位运算
+            //非运算
+            this.SetSymbol({ key: '~', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 1)
+                        throw "参数数量错误！";
+                    var num = args[0];
+                    if (typeof num != "number")
+                        throw new Error("错误！只能对数值类型进行位运算");
+                    return ~num;
+                } });
+            //与运算
+            this.SetSymbol({ key: '&', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var num = args[0];
+                    var num2 = args[1];
+                    if (typeof num != "number" || typeof num2 != "number")
+                        throw new Error("错误！只能对数值类型进行位运算");
+                    return num & num2;
+                } });
+            //或运算
+            this.SetSymbol({ key: '&', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var num = args[0];
+                    var num2 = args[1];
+                    if (typeof num != "number" || typeof num2 != "number")
+                        throw new Error("错误！只能对数值类型进行位运算");
+                    return num | num2;
+                } });
+            //位移动运算
+            this.SetSymbol({ key: '<<', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var num = args[0];
+                    var num2 = args[1];
+                    if (typeof num != "number" || typeof num2 != "number")
+                        throw new Error("错误！只能对数值类型进行位运算");
+                    return num << num2;
+                } });
+            this.SetSymbol({ key: '>>', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var num = args[0];
+                    var num2 = args[1];
+                    if (typeof num != "number" || typeof num2 != "number")
+                        throw new Error("错误！只能对数值类型进行位运算");
+                    return num >> num2;
+                } });
+            //循环位移指令
+            //循环左移
+            this.SetSymbol({ key: 'rol', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var num = args[0];
+                    var num2 = args[1];
+                    if (typeof num != "number" || typeof num2 != "number")
+                        throw new Error("错误！只能对数值类型进行位运算");
+                    //使用LimitNumber库处理
+                    if (num2 == 0)
+                        return num;
+                    var tbits = new LispExecute.LimitNumber.DWord(true, num).GetLimitBits(32 - num2, 31);
+                    var ret = num << num2;
+                    var temp = new LispExecute.LimitNumber.DWord(false, ret);
+                    temp.SetLimitBits(0, num2 - 1, tbits);
+                    ret = temp.Value;
+                    return ret;
+                } });
+            //循环右移
+            //循环位移指令
+            this.SetSymbol({ key: 'ror', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var num = args[0];
+                    var num2 = args[1];
+                    if (typeof num != "number" || typeof num2 != "number")
+                        throw new Error("错误！只能对数值类型进行位运算");
+                    //使用LimitNumber库处理
+                    if (num2 == 0)
+                        return num;
+                    var tbits = new LispExecute.LimitNumber.DWord(true, num).GetLimitBits(0, num2 - 1);
+                    var ret = num >> num2;
+                    var temp = new LispExecute.LimitNumber.DWord(false, ret);
+                    temp.SetLimitBits(num2, 31, tbits);
+                    ret = temp.Value;
+                    return ret;
+                } });
             //设置别名
             this.SetOtherName("define", "let");
             this.SetOtherName("define", "set!");

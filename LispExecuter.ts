@@ -429,6 +429,77 @@ namespace LispExecute
                 if(args.length!=1) throw "参数数量错误！";
                 return new LispObject(!args[0]);
             }});
+            //位运算
+            //非运算
+            this.SetSymbol(<SymPair>{key:'~',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=1) throw "参数数量错误！";
+                let num=args[0];
+                if(typeof num!="number") throw new Error("错误！只能对数值类型进行位运算");
+                return ~num;
+            }});
+            //与运算
+            this.SetSymbol(<SymPair>{key:'&',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let num=args[0];
+                let num2=args[1];
+                if(typeof num!="number"||typeof num2!="number") throw new Error("错误！只能对数值类型进行位运算");
+                return num&num2;
+            }});
+            //或运算
+            this.SetSymbol(<SymPair>{key:'&',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let num=args[0];
+                let num2=args[1];
+                if(typeof num!="number"||typeof num2!="number") throw new Error("错误！只能对数值类型进行位运算");
+                return num|num2;
+            }});
+            //位移动运算
+            this.SetSymbol(<SymPair>{key:'<<',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let num=args[0];
+                let num2=args[1];
+                if(typeof num!="number"||typeof num2!="number") throw new Error("错误！只能对数值类型进行位运算");
+                return num<<num2;
+            }});
+            this.SetSymbol(<SymPair>{key:'>>',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let num=args[0];
+                let num2=args[1];
+                if(typeof num!="number"||typeof num2!="number") throw new Error("错误！只能对数值类型进行位运算");
+                return num>>num2;
+            }});
+            //循环位移指令
+            //循环左移
+            this.SetSymbol(<SymPair>{key:'rol',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let num=args[0];
+                let num2=args[1];
+                if(typeof num!="number"||typeof num2!="number") throw new Error("错误！只能对数值类型进行位运算");
+                //使用LimitNumber库处理
+                if(num2==0) return num;
+                let tbits=new LimitNumber.DWord(true,num).GetLimitBits(32-num2,31);
+                let ret=num<<num2;
+                let temp=new LimitNumber.DWord(false,ret);
+                temp.SetLimitBits(0,num2-1,tbits);
+                ret=temp.Value;
+                return ret;
+            }});
+            //循环右移
+            //循环位移指令
+            this.SetSymbol(<SymPair>{key:'ror',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let num=args[0];
+                let num2=args[1];
+                if(typeof num!="number"||typeof num2!="number") throw new Error("错误！只能对数值类型进行位运算");
+                //使用LimitNumber库处理
+                if(num2==0) return num;
+                let tbits=new LimitNumber.DWord(true,num).GetLimitBits(0,num2-1);
+                let ret=num>>num2;
+                let temp=new LimitNumber.DWord(false,ret);
+                temp.SetLimitBits(num2,31,tbits);
+                ret=temp.Value;
+                return ret;
+            }});
             //设置别名
             this.SetOtherName("define","let");
             this.SetOtherName("define","set!");

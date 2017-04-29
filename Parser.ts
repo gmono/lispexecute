@@ -51,7 +51,26 @@ namespace LispExecute
             }
             else
             {
-                let num=parseFloat(val);
+                let num=null;
+                let sign="box";
+                for(let c of sign)
+                {
+                    if(val.indexOf(c)!=-1&&val.lastIndexOf(c)==val.indexOf(c))
+                    {
+                        num=parseInt(val);
+                        break;
+                    }
+                }
+                if(num==null)
+                {
+                    //处理#号
+                    if(val[0]=='#')
+                    {
+                        let nval="0x"+val.slice(1,val.length);
+                        num=parseInt(nval);
+                    }
+                    else num=parseFloat(val);
+                }
                 if(isNaN(num))
                 {
                     //此字面量为符号

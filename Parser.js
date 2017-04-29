@@ -39,7 +39,24 @@ var LispExecute;
                 return new LispExecute.LispObject(JSON.parse(val));
             }
             else {
-                var num = parseFloat(val);
+                var num = null;
+                var sign = "box";
+                for (var _i = 0, sign_1 = sign; _i < sign_1.length; _i++) {
+                    var c_1 = sign_1[_i];
+                    if (val.indexOf(c_1) != -1 && val.lastIndexOf(c_1) == val.indexOf(c_1)) {
+                        num = parseInt(val);
+                        break;
+                    }
+                }
+                if (num == null) {
+                    //处理#号
+                    if (val[0] == '#') {
+                        var nval = "0x" + val.slice(1, val.length);
+                        num = parseInt(nval);
+                    }
+                    else
+                        num = parseFloat(val);
+                }
                 if (isNaN(num)) {
                     //此字面量为符号
                     return new LispExecute.LispSymbolRefence(val);
