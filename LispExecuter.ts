@@ -319,6 +319,17 @@ namespace LispExecute
                 if(args.length!=2) throw "参数数量错误！";
                 return new LispObject(iseq(args[0],args[1]));
             }});
+            //值相等判断 对于Object和Table直接判断引用
+            this.SetSymbol(<SymPair>{key:'eq?',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+                if(args.length!=2) throw "参数数量错误！";
+                let targs=<Table[]>args;
+                if(targs[0].Type!=targs[1].Type) return new LispObject(false);
+                if(targs[0].Type=="symbol") return new LispObject((targs[0] as LispSymbolRefence).name==(targs[1] as LispSymbolRefence).name);
+                if(targs[0].Type=="object") return new LispObject((args[0] as LispObject).Object==(args[1] as LispObject).Object);
+                //normal
+                //如果直接就是个table  那肯定不是相等的
+                return false;
+            }});
             //构造一个匿名函数
             this.SetSymbol(<SymPair>{key:'lambda',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
                 //判断定义类型 如果def部分为normal表则为过程定义
@@ -422,6 +433,7 @@ namespace LispExecute
             this.SetOtherName("define","let");
             this.SetOtherName("define","set!");
             this.SetOtherName("do","begin");
+            this.SetOtherName("eqv?","eq?");
             
         }
     }

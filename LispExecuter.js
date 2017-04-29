@@ -414,6 +414,25 @@ var LispExecute;
                         throw "参数数量错误！";
                     return new LispExecute.LispObject(iseq(args[0], args[1]));
                 } });
+            //值相等判断 对于Object和Table直接判断引用
+            this.SetSymbol({ key: 'eq?', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+                    var args = [];
+                    for (var _i = 1; _i < arguments.length; _i++) {
+                        args[_i - 1] = arguments[_i];
+                    }
+                    if (args.length != 2)
+                        throw "参数数量错误！";
+                    var targs = args;
+                    if (targs[0].Type != targs[1].Type)
+                        return new LispExecute.LispObject(false);
+                    if (targs[0].Type == "symbol")
+                        return new LispExecute.LispObject(targs[0].name == targs[1].name);
+                    if (targs[0].Type == "object")
+                        return new LispExecute.LispObject(args[0].Object == args[1].Object);
+                    //normal
+                    //如果直接就是个table  那肯定不是相等的
+                    return false;
+                } });
             //构造一个匿名函数
             this.SetSymbol({ key: 'lambda', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
                     var args = [];
@@ -549,6 +568,7 @@ var LispExecute;
             this.SetOtherName("define", "let");
             this.SetOtherName("define", "set!");
             this.SetOtherName("do", "begin");
+            this.SetOtherName("eqv?", "eq?");
         };
         return LispExecuter;
     }(LispExecute.Executer));
