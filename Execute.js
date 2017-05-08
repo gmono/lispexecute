@@ -26,7 +26,9 @@ var LispExecute;
             //此处的this对象为Executer对象
             return function (target, propertyKey, descriptor) {
                 sym.val = target[propertyKey];
-                target.SetSymbol(sym);
+                if (target.symbols == null)
+                    target.symbols = [];
+                target.symbols.push(sym);
             };
         };
         return SymDecorator;
@@ -85,6 +87,12 @@ var LispExecute;
                     this.SetSymbol(t);
                 }
         }
+        Executer.prototype.AddPreSymbols = function () {
+            for (var _i = 0, _a = this.symbols; _i < _a.length; _i++) {
+                var t = _a[_i];
+                this.SetSymbol(t);
+            }
+        };
         /**
          * 设置一个符号 可以覆盖
          * @param sym 符号

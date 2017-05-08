@@ -26,7 +26,8 @@ namespace LispExecute
             //此处的this对象为Executer对象
             return function(target:Executer, propertyKey: string, descriptor: PropertyDescriptor){
                 sym.val=target[propertyKey];
-                target.SetSymbol(sym);
+                if(target.symbols==null) target.symbols=[];
+                target.symbols.push(sym);
             };
         }
     }
@@ -74,7 +75,14 @@ namespace LispExecute
     export abstract class Executer
     {
         public TopContainer:LinkContainer;
-        protected abstract AddPreSymbols();
+        public symbols:SymPair[];
+        protected  AddPreSymbols()
+        {
+            for(let t of this.symbols)
+            {
+                this.SetSymbol(t);
+            }
+        }
         public constructor(link:any=null,initstate?:SymPair[])
         {
             //先加入预定义符号 加减乘除等
