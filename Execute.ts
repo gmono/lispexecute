@@ -5,10 +5,30 @@ namespace LispExecute
         key:string;
         val:any;
         //下面是函数专属属性
-        isneedcircum?:boolean;
-        callthis?:any;
-        isneedcal?:boolean;
-        isneedtrans?:boolean;
+        isNeedStore?:boolean;
+        Callthis?:any;
+        isNeedCal?:boolean;
+        isNeedTrans?:boolean;
+    }
+    //符号装饰器集合
+    export class SymDecorator
+    {
+        static SymbolDef(name:string,NeedStore:boolean,thisobj:any,NeedCalPars:boolean,NeedTransObject:boolean)
+        {
+            let sym=<SymPair>{
+                key:name,
+                isNeedStore:NeedStore,
+                Callthis:thisobj,
+                isNeedCal:NeedCalPars,
+                isNeedTrans:NeedTransObject
+            };
+            //此处不能使用箭头函数
+            //此处的this对象为Executer对象
+            return function(target:Executer, propertyKey: string, descriptor: PropertyDescriptor){
+                sym.val=target[propertyKey];
+                target.SetSymbol(sym);
+            };
+        }
     }
     export class LinkContainer extends Store
     {
@@ -167,7 +187,7 @@ namespace LispExecute
                 {
                     //封装函数
                     let fun:Function=sym.val as Function;
-                    let func=new LispRawProcess(sym.key,fun,sym.isneedcircum,sym.callthis,sym.isneedcal,sym.isneedtrans);
+                    let func=new LispRawProcess(sym.key,fun,sym.isNeedStore,sym.Callthis,sym.isNeedCal,sym.isNeedTrans);
                     return func;
                 }
                 else

@@ -2,6 +2,11 @@ namespace LispExecute
 {
     export class LispExecuter extends Executer
     {
+        @SymDecorator.SymbolDef("test",false,null,true,true)
+        public testsymbol()
+        {
+            alert("success!");
+        }
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
         //但是可以使用转化标记
@@ -16,7 +21,7 @@ namespace LispExecute
                 if(tb.Type=="object"&&(<LispObject>tb).Object==false) return false;
                 return true;
             }
-            this.SetSymbol(<SymPair>{key:'+',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'+',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 if(typeof args[0]!="number"&&typeof args[0]!="string") throw new Error("错误！运算对象类型错误！");
                 let sum=typeof args[0] =="number"? 0:"";
                 for(let t of args)
@@ -27,7 +32,7 @@ namespace LispExecute
                 return sum;
             }});
             //减法只能用于数字
-            this.SetSymbol(<SymPair>{key:'-',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'-',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                 let sum=args[0];
                 for(let t of args.slice(1,args.length))
@@ -38,7 +43,7 @@ namespace LispExecute
                 return sum;
             }});
             //乘法可以用于重复语义和数字
-            this.SetSymbol(<SymPair>{key:'*',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'*',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                    let sum=args[0];
                    //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
                    if(typeof sum=="string")
@@ -65,7 +70,7 @@ namespace LispExecute
                    else throw new Error("错误！运算对象类型错误！");;
                    return sum;
                }});
-            this.SetSymbol(<SymPair>{key:'/',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'/',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                 let sum=args[0];
                 for(let t of args.slice(1,args.length))
@@ -76,7 +81,7 @@ namespace LispExecute
                 return sum;
             }});
             //比较操作部分
-            this.SetSymbol(<SymPair>{key:'>',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'>',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -85,7 +90,7 @@ namespace LispExecute
                 }
                 return true;
             }});
-            this.SetSymbol(<SymPair>{key:'<',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'<',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -94,7 +99,7 @@ namespace LispExecute
                 }
                 return true;
             }});
-            this.SetSymbol(<SymPair>{key:'=',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'=',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -103,7 +108,7 @@ namespace LispExecute
                 }
                 return true;
             }});
-            this.SetSymbol(<SymPair>{key:'>=',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'>=',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -112,7 +117,7 @@ namespace LispExecute
                 }
                 return true;
             }});
-            this.SetSymbol(<SymPair>{key:'<=',isneedcircum:false,callthis:null,isneedcal:true,val:(...args)=>{
+            this.SetSymbol(<SymPair>{key:'<=',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -131,7 +136,7 @@ namespace LispExecute
                 return ret;
             }
             //将几个表连接起来
-            this.SetSymbol(<SymPair>{key:'do',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'do',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 //此过程对接收的每个参数求值 后返回最后一个求值的结果
                 //此过程用于将多个Table联合在一起作为一个Table求值
                 let ret:Table;
@@ -141,7 +146,7 @@ namespace LispExecute
                 }
                 return ret.Calculate(circum);
             }});
-            this.SetSymbol(<SymPair>{key:'define',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'define',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 //判断定义类型 如果def部分为normal表则为过程定义
                 //否则则为变量定义
                 //注意define操作符不返回值 即返回undefined
@@ -174,7 +179,7 @@ namespace LispExecute
                 throw new Error("符号定义错误！头部类型不正确");
 
             }});
-            this.SetSymbol(<SymPair>{key:'if',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'if',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 //这里来判断条件
                 if(args.length<2) throw new Error("错误！IF操作参数过少！");
                 let p=args[0] as Table;
@@ -199,13 +204,13 @@ namespace LispExecute
                 }
                 else return undefined;
             }});
-            this.SetSymbol(<SymPair>{key:'typeof',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'typeof',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return (<Table>args[0]).Calculate(circum).Type;
                 //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
   
             }});
-            this.SetSymbol(<SymPair>{key:'objtype',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'objtype',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=(<Table>args[0]).Calculate(circum);
                 if(temp.Type=="object")
@@ -217,18 +222,18 @@ namespace LispExecute
   
             }});
             //直接返回表本身（用于提供不计算通道）
-            this.SetSymbol(<SymPair>{key:'quote',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'quote',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return args[0];
             }});
             //返回表的第一个元素（如果不存在返回undefined)
-            this.SetSymbol(<SymPair>{key:'car',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'car',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let tb=<Table>args[0];
                 return tb.childs[0];
             }});
             //返回剩余内容 作为表返回
-            this.SetSymbol(<SymPair>{key:'cdr',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'cdr',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let tb=<Table>args[0];
                 let ret=new Table();
@@ -236,7 +241,7 @@ namespace LispExecute
                 return ret;
             }});
             //将参数1插入到参数2（表）的头部
-            this.SetSymbol(<SymPair>{key:'cons',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'cons',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let inset=<Table>args[0];
                 let tb=<Table>args[1];
@@ -246,7 +251,7 @@ namespace LispExecute
                 return ret;
             }});
             //分支结构
-            this.SetSymbol(<SymPair>{key:'cond',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'cond',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 let now=0;//计数器主要用于测定else合法性
                 for(let t of args)
                 {
@@ -315,12 +320,12 @@ namespace LispExecute
                     return false;
                 }
             }
-            this.SetSymbol(<SymPair>{key:'equal?',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'equal?',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 return new LispObject(iseq(args[0],args[1]));
             }});
             //值相等判断 对于Object和Table直接判断引用
-            this.SetSymbol(<SymPair>{key:'eq?',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'eq?',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let targs=<Table[]>args;
                 if(targs[0].Type!=targs[1].Type) return new LispObject(false);
@@ -331,7 +336,7 @@ namespace LispExecute
                 return false;
             }});
             //构造一个匿名函数
-            this.SetSymbol(<SymPair>{key:'lambda',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'lambda',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 //判断定义类型 如果def部分为normal表则为过程定义
                 //否则则为变量定义
                 //注意define操作符不返回值 即返回undefined
@@ -363,7 +368,7 @@ namespace LispExecute
                     return proc;
             }});
             //判断是否为基础数据类型 即是否为object型表
-             this.SetSymbol(<SymPair>{key:'atom',isneedcircum:false,callthis:null,isneedcal:true,isneedtrans:false,val:(...args)=>{
+             this.SetSymbol(<SymPair>{key:'atom',isNeedStore:false,Callthis:null,isNeedCal:true,isNeedTrans:false,val:(...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<Table>args[0];
                 if(temp.Type=="object")
@@ -373,7 +378,7 @@ namespace LispExecute
                 else return new LispObject(false);
             }});
             //下面为原生对象操作
-            this.SetSymbol(<SymPair>{key:'prop',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'prop',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let temp=(<Table>args[0]).Calculate(circum);
                 if(temp.Type=="object")
@@ -397,7 +402,7 @@ namespace LispExecute
                 }
             }});
             //将一个function数据对象变成一个process
-            this.SetSymbol(<SymPair>{key:'proc',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'proc',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<Table>args[0];
                 if(temp.Type=="object"&&typeof (<LispObject>temp).Object=="function")
@@ -407,7 +412,7 @@ namespace LispExecute
             }});
 
             //取一个符号的名字
-            this.SetSymbol(<SymPair>{key:'symname',isneedcircum:true,callthis:null,isneedcal:false,isneedtrans:false,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'symname',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let temp=<LispSymbolRefence>args[0];
                 if(temp.Type=="symbol")
@@ -417,28 +422,28 @@ namespace LispExecute
                 throw new Error("只能对符号执行字符串化!");
             }});
             //逻辑运算符
-            this.SetSymbol(<SymPair>{key:'and',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'and',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 return new LispObject(args[0]&&args[1]);
             }});
-            this.SetSymbol(<SymPair>{key:'or',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'or',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 return new LispObject(args[0]||args[1]);
             }});
-            this.SetSymbol(<SymPair>{key:'not',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'not',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 return new LispObject(!args[0]);
             }});
             //位运算
             //非运算
-            this.SetSymbol(<SymPair>{key:'~',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'~',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=1) throw "参数数量错误！";
                 let num=args[0];
                 if(typeof num!="number") throw new Error("错误！只能对数值类型进行位运算");
                 return ~num;
             }});
             //与运算
-            this.SetSymbol(<SymPair>{key:'&',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'&',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let num=args[0];
                 let num2=args[1];
@@ -446,7 +451,7 @@ namespace LispExecute
                 return num&num2;
             }});
             //或运算
-            this.SetSymbol(<SymPair>{key:'&',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'&',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let num=args[0];
                 let num2=args[1];
@@ -454,14 +459,14 @@ namespace LispExecute
                 return num|num2;
             }});
             //位移动运算
-            this.SetSymbol(<SymPair>{key:'<<',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'<<',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let num=args[0];
                 let num2=args[1];
                 if(typeof num!="number"||typeof num2!="number") throw new Error("错误！只能对数值类型进行位运算");
                 return num<<num2;
             }});
-            this.SetSymbol(<SymPair>{key:'>>',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'>>',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let num=args[0];
                 let num2=args[1];
@@ -470,7 +475,7 @@ namespace LispExecute
             }});
             //循环位移指令
             //循环左移
-            this.SetSymbol(<SymPair>{key:'rol',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'rol',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let num=args[0];
                 let num2=args[1];
@@ -486,7 +491,7 @@ namespace LispExecute
             }});
             //循环右移
             //循环位移指令
-            this.SetSymbol(<SymPair>{key:'ror',isneedcircum:true,callthis:null,isneedcal:true,isneedtrans:true,val:(circum:Store,...args)=>{
+            this.SetSymbol(<SymPair>{key:'ror',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:true,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 let num=args[0];
                 let num2=args[1];
@@ -501,7 +506,7 @@ namespace LispExecute
                 return ret;
             }});
             //设置别名
-            this.SetOtherName("define","let");
+            // this.SetOtherName("define","let"); 这是错误的。。
             this.SetOtherName("define","set!");
             this.SetOtherName("do","begin");
             this.SetOtherName("eqv?","eq?");

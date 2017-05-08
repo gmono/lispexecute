@@ -10,6 +10,28 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var LispExecute;
 (function (LispExecute) {
+    //符号装饰器集合
+    var SymDecorator = (function () {
+        function SymDecorator() {
+        }
+        SymDecorator.SymbolDef = function (name, NeedStore, thisobj, NeedCalPars, NeedTransObject) {
+            var sym = {
+                key: name,
+                isNeedStore: NeedStore,
+                Callthis: thisobj,
+                isNeedCal: NeedCalPars,
+                isNeedTrans: NeedTransObject
+            };
+            //此处不能使用箭头函数
+            //此处的this对象为Executer对象
+            return function (target, propertyKey, descriptor) {
+                sym.val = target[propertyKey];
+                target.SetSymbol(sym);
+            };
+        };
+        return SymDecorator;
+    }());
+    LispExecute.SymDecorator = SymDecorator;
     var LinkContainer = (function (_super) {
         __extends(LinkContainer, _super);
         function LinkContainer(LinkObject) {
@@ -150,7 +172,7 @@ var LispExecute;
             else if (typeof sym.val == "function") {
                 //封装函数
                 var fun = sym.val;
-                var func = new LispExecute.LispRawProcess(sym.key, fun, sym.isneedcircum, sym.callthis, sym.isneedcal, sym.isneedtrans);
+                var func = new LispExecute.LispRawProcess(sym.key, fun, sym.isNeedStore, sym.Callthis, sym.isNeedCal, sym.isNeedTrans);
                 return func;
             }
             else {

@@ -8,6 +8,12 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var LispExecute;
 (function (LispExecute) {
     var LispExecuter = (function (_super) {
@@ -15,6 +21,9 @@ var LispExecute;
         function LispExecuter() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
+        LispExecuter.prototype.testsymbol = function () {
+            alert("success!");
+        };
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
         //但是可以使用转化标记
@@ -29,7 +38,7 @@ var LispExecute;
                     return false;
                 return true;
             };
-            this.SetSymbol({ key: '+', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '+', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -46,7 +55,7 @@ var LispExecute;
                     return sum;
                 } });
             //减法只能用于数字
-            this.SetSymbol({ key: '-', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '-', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -63,7 +72,7 @@ var LispExecute;
                     return sum;
                 } });
             //乘法可以用于重复语义和数字
-            this.SetSymbol({ key: '*', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '*', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -94,7 +103,7 @@ var LispExecute;
                     ;
                     return sum;
                 } });
-            this.SetSymbol({ key: '/', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '/', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -111,7 +120,7 @@ var LispExecute;
                     return sum;
                 } });
             //比较操作部分
-            this.SetSymbol({ key: '>', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '>', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -125,7 +134,7 @@ var LispExecute;
                     }
                     return true;
                 } });
-            this.SetSymbol({ key: '<', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '<', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -139,7 +148,7 @@ var LispExecute;
                     }
                     return true;
                 } });
-            this.SetSymbol({ key: '=', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '=', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -153,7 +162,7 @@ var LispExecute;
                     }
                     return true;
                 } });
-            this.SetSymbol({ key: '>=', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '>=', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -167,7 +176,7 @@ var LispExecute;
                     }
                     return true;
                 } });
-            this.SetSymbol({ key: '<=', isneedcircum: false, callthis: null, isneedcal: true, val: function () {
+            this.SetSymbol({ key: '<=', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -188,7 +197,7 @@ var LispExecute;
                 return ret;
             };
             //将几个表连接起来
-            this.SetSymbol({ key: 'do', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'do', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -202,7 +211,7 @@ var LispExecute;
                     }
                     return ret.Calculate(circum);
                 } });
-            this.SetSymbol({ key: 'define', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'define', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -237,7 +246,7 @@ var LispExecute;
                     }
                     throw new Error("符号定义错误！头部类型不正确");
                 } });
-            this.SetSymbol({ key: 'if', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'if', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -266,7 +275,7 @@ var LispExecute;
                     else
                         return undefined;
                 } });
-            this.SetSymbol({ key: 'typeof', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'typeof', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -276,7 +285,7 @@ var LispExecute;
                     return args[0].Calculate(circum).Type;
                     //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
                 } });
-            this.SetSymbol({ key: 'objtype', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'objtype', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -291,7 +300,7 @@ var LispExecute;
                     //这里之所以不直接标记需要计算参数，原因是避免很多参数时进行大量的参数计算
                 } });
             //直接返回表本身（用于提供不计算通道）
-            this.SetSymbol({ key: 'quote', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'quote', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -301,7 +310,7 @@ var LispExecute;
                     return args[0];
                 } });
             //返回表的第一个元素（如果不存在返回undefined)
-            this.SetSymbol({ key: 'car', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'car', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -312,7 +321,7 @@ var LispExecute;
                     return tb.childs[0];
                 } });
             //返回剩余内容 作为表返回
-            this.SetSymbol({ key: 'cdr', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'cdr', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -325,7 +334,7 @@ var LispExecute;
                     return ret;
                 } });
             //将参数1插入到参数2（表）的头部
-            this.SetSymbol({ key: 'cons', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'cons', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -341,7 +350,7 @@ var LispExecute;
                     return ret;
                 } });
             //分支结构
-            this.SetSymbol({ key: 'cond', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'cond', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -405,7 +414,7 @@ var LispExecute;
                     return false;
                 }
             };
-            this.SetSymbol({ key: 'equal?', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'equal?', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -415,7 +424,7 @@ var LispExecute;
                     return new LispExecute.LispObject(iseq(args[0], args[1]));
                 } });
             //值相等判断 对于Object和Table直接判断引用
-            this.SetSymbol({ key: 'eq?', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'eq?', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -434,7 +443,7 @@ var LispExecute;
                     return false;
                 } });
             //构造一个匿名函数
-            this.SetSymbol({ key: 'lambda', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'lambda', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -468,7 +477,7 @@ var LispExecute;
                     return proc;
                 } });
             //判断是否为基础数据类型 即是否为object型表
-            this.SetSymbol({ key: 'atom', isneedcircum: false, callthis: null, isneedcal: true, isneedtrans: false, val: function () {
+            this.SetSymbol({ key: 'atom', isNeedStore: false, Callthis: null, isNeedCal: true, isNeedTrans: false, val: function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
                         args[_i] = arguments[_i];
@@ -483,7 +492,7 @@ var LispExecute;
                         return new LispExecute.LispObject(false);
                 } });
             //下面为原生对象操作
-            this.SetSymbol({ key: 'prop', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'prop', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -496,21 +505,21 @@ var LispExecute;
                         var obj = temp.Object;
                         var pname = args[1];
                         pname = pname.Calculate(circum);
-                        var name = void 0;
+                        var name_1;
                         if (pname.Type == "object") {
-                            name = pname.Object;
+                            name_1 = pname.Object;
                         }
                         else
                             throw new Error("错误！属性名必须为字符串或符号引用");
-                        if (name in obj) {
-                            return new LispExecute.LispObject(obj[name]);
+                        if (name_1 in obj) {
+                            return new LispExecute.LispObject(obj[name_1]);
                         }
                         //调试用
-                        throw new Error("\u9519\u8BEF\uFF01\u6307\u5B9A\u5BF9\u8C61\u4E2D\u4E0D\u5B58\u5728\u5C5E\u6027\uFF1A" + name);
+                        throw new Error("\u9519\u8BEF\uFF01\u6307\u5B9A\u5BF9\u8C61\u4E2D\u4E0D\u5B58\u5728\u5C5E\u6027\uFF1A" + name_1);
                     }
                 } });
             //将一个function数据对象变成一个process
-            this.SetSymbol({ key: 'proc', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'proc', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -523,7 +532,7 @@ var LispExecute;
                     }
                 } });
             //取一个符号的名字
-            this.SetSymbol({ key: 'symname', isneedcircum: true, callthis: null, isneedcal: false, isneedtrans: false, val: function (circum) {
+            this.SetSymbol({ key: 'symname', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -537,7 +546,7 @@ var LispExecute;
                     throw new Error("只能对符号执行字符串化!");
                 } });
             //逻辑运算符
-            this.SetSymbol({ key: 'and', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: 'and', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -546,7 +555,7 @@ var LispExecute;
                         throw "参数数量错误！";
                     return new LispExecute.LispObject(args[0] && args[1]);
                 } });
-            this.SetSymbol({ key: 'or', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: 'or', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -555,7 +564,7 @@ var LispExecute;
                         throw "参数数量错误！";
                     return new LispExecute.LispObject(args[0] || args[1]);
                 } });
-            this.SetSymbol({ key: 'not', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: 'not', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -566,7 +575,7 @@ var LispExecute;
                 } });
             //位运算
             //非运算
-            this.SetSymbol({ key: '~', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: '~', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -579,7 +588,7 @@ var LispExecute;
                     return ~num;
                 } });
             //与运算
-            this.SetSymbol({ key: '&', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: '&', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -593,7 +602,7 @@ var LispExecute;
                     return num & num2;
                 } });
             //或运算
-            this.SetSymbol({ key: '&', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: '&', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -607,7 +616,7 @@ var LispExecute;
                     return num | num2;
                 } });
             //位移动运算
-            this.SetSymbol({ key: '<<', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: '<<', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -620,7 +629,7 @@ var LispExecute;
                         throw new Error("错误！只能对数值类型进行位运算");
                     return num << num2;
                 } });
-            this.SetSymbol({ key: '>>', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: '>>', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -635,7 +644,7 @@ var LispExecute;
                 } });
             //循环位移指令
             //循环左移
-            this.SetSymbol({ key: 'rol', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: 'rol', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -658,7 +667,7 @@ var LispExecute;
                 } });
             //循环右移
             //循环位移指令
-            this.SetSymbol({ key: 'ror', isneedcircum: true, callthis: null, isneedcal: true, isneedtrans: true, val: function (circum) {
+            this.SetSymbol({ key: 'ror', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: true, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
@@ -680,13 +689,16 @@ var LispExecute;
                     return ret;
                 } });
             //设置别名
-            this.SetOtherName("define", "let");
+            // this.SetOtherName("define","let"); 这是错误的。。
             this.SetOtherName("define", "set!");
             this.SetOtherName("do", "begin");
             this.SetOtherName("eqv?", "eq?");
         };
         return LispExecuter;
     }(LispExecute.Executer));
+    __decorate([
+        LispExecute.SymDecorator.SymbolDef("test", false, null, true, true)
+    ], LispExecuter.prototype, "testsymbol", null);
     LispExecute.LispExecuter = LispExecuter;
 })(LispExecute || (LispExecute = {}));
 //# sourceMappingURL=LispExecuter.js.map
