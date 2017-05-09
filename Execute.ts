@@ -30,6 +30,60 @@ namespace LispExecute
                 target.symbols.push(sym);
             };
         }
+        /**
+         * 原生函数封装装饰器 提供和原生js函数一样的执行环境
+         */
+        static RawFunction(name:string)
+        {
+            return function(target:Executer, propertyKey: string, descriptor: PropertyDescriptor){
+                let func=SymDecorator.SymbolDef(name,false,target,true,true);
+                return func(target,propertyKey,descriptor);
+            }
+        }
+        /**
+         * 定义一个直接处理Lisp内部类型的js原生函数
+         * 其参数会被计算 但是不转换
+         * 不提供store 这是主要区别，store会打乱正常js函数的参数序列
+         */
+        static LispRawFunc(name:string)
+        {
+            return function(target:Executer, propertyKey: string, descriptor: PropertyDescriptor){
+                let func=SymDecorator.SymbolDef(name,false,target,true,false);
+                return func(target,propertyKey,descriptor);
+            }
+        }
+        /**
+         * 纯操作符（加减乘除等只进行与传入数据对象相关操作的函数)
+         * 不提供this对象
+         * 不提供除参数外的任何内容
+         */
+        static OperaSymbol(name:string)
+        {
+            return SymDecorator.SymbolDef(name,false,null,true,true);
+        }
+        /**
+         * 这是全功能表处理符号
+         * 
+         */
+        static TableSymbol(name:string)
+        {
+            return function(target:Executer, propertyKey: string, descriptor: PropertyDescriptor){
+                let func=SymDecorator.SymbolDef(name,true,target,false,false);
+                return func(target,propertyKey,descriptor);
+            }
+        }
+        /**
+         * 内部过程定义
+         * 定义一个Lisp内部过程
+         * 其参数自动计算 类型不进行转换
+         */
+        static InnerFunc(name:string)
+        {
+            return function(target:Executer, propertyKey: string, descriptor: PropertyDescriptor){
+                let func=SymDecorator.SymbolDef(name,true,target,true,false);
+                return func(target,propertyKey,descriptor);
+            }
+        }
     }
     export class LinkContainer extends Store
     {
