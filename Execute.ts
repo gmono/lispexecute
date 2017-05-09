@@ -63,7 +63,7 @@ namespace LispExecute
         }
         /**
          * 这是全功能表处理符号
-         * 
+         * 提供store 不进行任何转换 参数不计算
          */
         static TableSymbol(name:string)
         {

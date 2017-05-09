@@ -61,7 +61,7 @@ var LispExecute;
         };
         /**
          * 这是全功能表处理符号
-         *
+         * 提供store 不进行任何转换 参数不计算
          */
         SymDecorator.TableSymbol = function (name) {
             return function (target, propertyKey, descriptor) {

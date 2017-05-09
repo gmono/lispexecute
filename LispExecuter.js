@@ -19,233 +19,255 @@ var LispExecute;
     var LispExecuter = (function (_super) {
         __extends(LispExecuter, _super);
         function LispExecuter() {
-            return _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            //内部数据结构比较相等
+            //对数据对象为正常js对象比较
+            //对于数据对象（非string和number）会直接比较引用
+            //要比较数据对象相等 使用deq?谓词
+            _this.TableEqual = function (t1, t2) {
+                if (t1.Type != t2.Type)
+                    return false;
+                if (t1.Type == "object") {
+                    return t1.Object == t2.Object;
+                }
+                if (t1.Type == "symbol") {
+                    return t1.name == t2.name;
+                }
+                if (t1.Type == "normal") {
+                    var cs = t1.childs;
+                    var cs2 = t2.childs;
+                    if (cs.length == cs2.length) {
+                        for (var i = 0; i < cs.length; ++i) {
+                            if (!_this.TableEqual(cs[i], cs2[i]))
+                                return false;
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            return _this;
         }
-        LispExecuter.prototype.testsymbol = function () {
-            alert("success!");
+        LispExecuter.prototype.IsTrue = function (tb) {
+            //检查计算的结果是否为真
+            //非false则为true   
+            //空表为false
+            if (tb.Type == "normal" && tb.childs.length == 0)
+                return false;
+            if (tb.Type == "object" && tb.Object == false)
+                return false;
+            return true;
+        };
+        //工具函数将几个表链接成一个do引导的执行列表
+        LispExecuter.prototype.LinkFunc = function (tabs) {
+            var ret = new LispExecute.Table();
+            ret.childs = [new LispExecute.LispSymbolRefence('do')].concat(tabs);
+            return ret;
+        };
+        LispExecuter.prototype.Add = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            if (typeof args[0] != "number" && typeof args[0] != "string")
+                throw new Error("错误！运算对象类型错误！");
+            var sum = typeof args[0] == "number" ? 0 : "";
+            for (var _a = 0, args_1 = args; _a < args_1.length; _a++) {
+                var t = args_1[_a];
+                if (typeof t != "number" && typeof t != "string")
+                    throw new Error("错误！运算对象类型错误！");
+                sum += t;
+            }
+            return sum;
+        };
+        LispExecuter.prototype.Sub = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            if (typeof args[0] != "number")
+                throw new Error("错误！运算对象类型错误！");
+            var sum = args[0];
+            for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (typeof args[0] != "number")
+                    throw new Error("错误！运算对象类型错误！");
+                sum -= t;
+            }
+            return sum;
+        };
+        LispExecuter.prototype.Mul = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var sum = args[0];
+            //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
+            if (typeof sum == "string") {
+                //重复语义
+                var nowblock = sum;
+                for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                    var a = _b[_a];
+                    if (typeof a != "number")
+                        throw new Error("错误！重复语义乘法除第一个参数外必须都为Number型!");
+                    for (var i = 0; i < a; ++i) {
+                        sum += nowblock;
+                    }
+                    nowblock = sum;
+                }
+            }
+            else if (typeof sum == "number") {
+                for (var _c = 0, _d = args.slice(1, args.length); _c < _d.length; _c++) {
+                    var a = _d[_c];
+                    sum *= a;
+                }
+            }
+            else
+                throw new Error("错误！运算对象类型错误！");
+            ;
+            return sum;
+        };
+        LispExecuter.prototype.Div = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            if (typeof args[0] != "number")
+                throw new Error("错误！运算对象类型错误！");
+            var sum = args[0];
+            for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (typeof args[0] != "number")
+                    throw new Error("错误！运算对象类型错误！");
+                sum /= t;
+            }
+            return sum;
+        };
+        //比较操作部分
+        LispExecuter.prototype.CmpA = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var old = args[0];
+            for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (!(old > t))
+                    return false;
+                old = t;
+            }
+            return true;
+        };
+        LispExecuter.prototype.CmpB = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var old = args[0];
+            for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (!(old < t))
+                    return false;
+                old = t;
+            }
+            return true;
+        };
+        LispExecuter.prototype.CmpE = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var old = args[0];
+            for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (!(old == t))
+                    return false;
+                old = t;
+            }
+            return true;
+        };
+        LispExecuter.prototype.CmpAE = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var old = args[0];
+            for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (!(old >= t))
+                    return false;
+                old = t;
+            }
+            return true;
+        };
+        LispExecuter.prototype.CmpBE = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var old = args[0];
+            for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (!(old <= t))
+                    return false;
+                old = t;
+            }
+            return true;
+        };
+        //将几个表连接起来
+        LispExecuter.prototype.Do = function (circum) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            //此过程对接收的每个参数求值 后返回最后一个求值的结果
+            //此过程用于将多个Table联合在一起作为一个Table求值
+            var ret;
+            for (var _a = 0, args_2 = args; _a < args_2.length; _a++) {
+                var a = args_2[_a];
+                ret = a.Calculate(circum);
+            }
+            return ret.Calculate(circum);
+        };
+        LispExecuter.prototype.Define = function (circum) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            //判断定义类型 如果def部分为normal表则为过程定义
+            //否则则为变量定义
+            //注意define操作符不返回值 即返回undefined
+            if (args.length < 2)
+                throw new Error("参数数量不正确");
+            var head = args[0];
+            if (head.Type == "symbol") {
+                //变量定义
+                if (args.length > 2)
+                    throw new Error("变量定义形式错误！参数数量不正确");
+                var val = args[1];
+                circum.Set(head.name, val.Calculate(circum));
+                return undefined;
+            }
+            if (head.Type == "normal") {
+                //这里来构造一个process
+                //先构造body
+                var bodylist = args.slice(1, args.length); //得到body序列
+                //合成一个body
+                var body = this.LinkFunc(bodylist);
+                var def = new LispExecute.Table();
+                def.childs[0] = args[0];
+                def.childs[1] = body;
+                var proc = new LispExecute.LispDefProcess(def);
+                //加入环境
+                circum.Set(proc.Name, proc);
+                return undefined;
+            }
+            throw new Error("符号定义错误！头部类型不正确");
         };
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
         //但是可以使用转化标记
         LispExecuter.prototype.AddPreSymbols = function () {
-            var istrue = function (tb) {
-                //检查计算的结果是否为真
-                //非false则为true   
-                //空表为false
-                if (tb.Type == "normal" && tb.childs.length == 0)
-                    return false;
-                if (tb.Type == "object" && tb.Object == false)
-                    return false;
-                return true;
-            };
-            this.SetSymbol({ key: '+', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    if (typeof args[0] != "number" && typeof args[0] != "string")
-                        throw new Error("错误！运算对象类型错误！");
-                    var sum = typeof args[0] == "number" ? 0 : "";
-                    for (var _a = 0, args_1 = args; _a < args_1.length; _a++) {
-                        var t = args_1[_a];
-                        if (typeof t != "number" && typeof t != "string")
-                            throw new Error("错误！运算对象类型错误！");
-                        sum += t;
-                    }
-                    return sum;
-                } });
-            //减法只能用于数字
-            this.SetSymbol({ key: '-', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    if (typeof args[0] != "number")
-                        throw new Error("错误！运算对象类型错误！");
-                    var sum = args[0];
-                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                        var t = _b[_a];
-                        if (typeof args[0] != "number")
-                            throw new Error("错误！运算对象类型错误！");
-                        sum -= t;
-                    }
-                    return sum;
-                } });
-            //乘法可以用于重复语义和数字
-            this.SetSymbol({ key: '*', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var sum = args[0];
-                    //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
-                    if (typeof sum == "string") {
-                        //重复语义
-                        var nowblock = sum;
-                        for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                            var a = _b[_a];
-                            if (typeof a != "number")
-                                throw new Error("错误！重复语义乘法除第一个参数外必须都为Number型!");
-                            for (var i = 0; i < a; ++i) {
-                                sum += nowblock;
-                            }
-                            nowblock = sum;
-                        }
-                    }
-                    else if (typeof sum == "number") {
-                        for (var _c = 0, _d = args.slice(1, args.length); _c < _d.length; _c++) {
-                            var a = _d[_c];
-                            sum *= a;
-                        }
-                    }
-                    else
-                        throw new Error("错误！运算对象类型错误！");
-                    ;
-                    return sum;
-                } });
-            this.SetSymbol({ key: '/', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    if (typeof args[0] != "number")
-                        throw new Error("错误！运算对象类型错误！");
-                    var sum = args[0];
-                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                        var t = _b[_a];
-                        if (typeof args[0] != "number")
-                            throw new Error("错误！运算对象类型错误！");
-                        sum /= t;
-                    }
-                    return sum;
-                } });
-            //比较操作部分
-            this.SetSymbol({ key: '>', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var old = args[0];
-                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                        var t = _b[_a];
-                        if (!(old > t))
-                            return false;
-                        old = t;
-                    }
-                    return true;
-                } });
-            this.SetSymbol({ key: '<', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var old = args[0];
-                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                        var t = _b[_a];
-                        if (!(old < t))
-                            return false;
-                        old = t;
-                    }
-                    return true;
-                } });
-            this.SetSymbol({ key: '=', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var old = args[0];
-                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                        var t = _b[_a];
-                        if (!(old == t))
-                            return false;
-                        old = t;
-                    }
-                    return true;
-                } });
-            this.SetSymbol({ key: '>=', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var old = args[0];
-                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                        var t = _b[_a];
-                        if (!(old >= t))
-                            return false;
-                        old = t;
-                    }
-                    return true;
-                } });
-            this.SetSymbol({ key: '<=', isNeedStore: false, Callthis: null, isNeedCal: true, val: function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var old = args[0];
-                    for (var _a = 0, _b = args.slice(1, args.length); _a < _b.length; _a++) {
-                        var t = _b[_a];
-                        if (!(old <= t))
-                            return false;
-                        old = t;
-                    }
-                    return true;
-                } });
-            //工具函数将几个表链接成一个do引导的执行列表
-            var linkfunc = function (tabs) {
-                var ret = new LispExecute.Table();
-                ret.childs = [new LispExecute.LispSymbolRefence('do')].concat(tabs);
-                return ret;
-            };
-            //将几个表连接起来
-            this.SetSymbol({ key: 'do', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
-                    var args = [];
-                    for (var _i = 1; _i < arguments.length; _i++) {
-                        args[_i - 1] = arguments[_i];
-                    }
-                    //此过程对接收的每个参数求值 后返回最后一个求值的结果
-                    //此过程用于将多个Table联合在一起作为一个Table求值
-                    var ret;
-                    for (var _a = 0, args_2 = args; _a < args_2.length; _a++) {
-                        var a = args_2[_a];
-                        ret = a.Calculate(circum);
-                    }
-                    return ret.Calculate(circum);
-                } });
-            this.SetSymbol({ key: 'define', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
-                    var args = [];
-                    for (var _i = 1; _i < arguments.length; _i++) {
-                        args[_i - 1] = arguments[_i];
-                    }
-                    //判断定义类型 如果def部分为normal表则为过程定义
-                    //否则则为变量定义
-                    //注意define操作符不返回值 即返回undefined
-                    if (args.length < 2)
-                        throw new Error("参数数量不正确");
-                    var head = args[0];
-                    if (head.Type == "symbol") {
-                        //变量定义
-                        if (args.length > 2)
-                            throw new Error("变量定义形式错误！参数数量不正确");
-                        var val = args[1];
-                        circum.Set(head.name, val.Calculate(circum));
-                        return undefined;
-                    }
-                    if (head.Type == "normal") {
-                        //这里来构造一个process
-                        //先构造body
-                        var bodylist = args.slice(1, args.length); //得到body序列
-                        //合成一个body
-                        var body = linkfunc(bodylist);
-                        var def = new LispExecute.Table();
-                        def.childs[0] = args[0];
-                        def.childs[1] = body;
-                        var proc = new LispExecute.LispDefProcess(def);
-                        //加入环境
-                        circum.Set(proc.Name, proc);
-                        return undefined;
-                    }
-                    throw new Error("符号定义错误！头部类型不正确");
-                } });
             this.SetSymbol({ key: 'if', isNeedStore: true, Callthis: null, isNeedCal: false, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
@@ -388,32 +410,6 @@ var LispExecute;
                     //不返回，如果没有匹配
                     return undefined;
                 } });
-            //内部数据结构比较相等
-            //对数据对象为正常js对象比较
-            //对于数据对象（非string和number）会直接比较引用
-            //要比较数据对象相等 使用deq?谓词
-            var iseq = function (t1, t2) {
-                if (t1.Type != t2.Type)
-                    return false;
-                if (t1.Type == "object") {
-                    return t1.Object == t2.Object;
-                }
-                if (t1.Type == "symbol") {
-                    return t1.name == t2.name;
-                }
-                if (t1.Type == "normal") {
-                    var cs = t1.childs;
-                    var cs2 = t2.childs;
-                    if (cs.length == cs2.length) {
-                        for (var i = 0; i < cs.length; ++i) {
-                            if (!iseq(cs[i], cs2[i]))
-                                return false;
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            };
             this.SetSymbol({ key: 'equal?', isNeedStore: true, Callthis: null, isNeedCal: true, isNeedTrans: false, val: function (circum) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
@@ -697,8 +693,38 @@ var LispExecute;
         return LispExecuter;
     }(LispExecute.Executer));
     __decorate([
-        LispExecute.SymDecorator.SymbolDef("test", false, null, true, true)
-    ], LispExecuter.prototype, "testsymbol", null);
+        LispExecute.SymDecorator.RawFunction("+")
+    ], LispExecuter.prototype, "Add", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction("-")
+    ], LispExecuter.prototype, "Sub", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction("*")
+    ], LispExecuter.prototype, "Mul", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction("/")
+    ], LispExecuter.prototype, "Div", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction(">")
+    ], LispExecuter.prototype, "CmpA", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction("<")
+    ], LispExecuter.prototype, "CmpB", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction("=")
+    ], LispExecuter.prototype, "CmpE", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction(">=")
+    ], LispExecuter.prototype, "CmpAE", null);
+    __decorate([
+        LispExecute.SymDecorator.RawFunction("<=")
+    ], LispExecuter.prototype, "CmpBE", null);
+    __decorate([
+        LispExecute.SymDecorator.TableSymbol("do")
+    ], LispExecuter.prototype, "Do", null);
+    __decorate([
+        LispExecute.SymDecorator.TableSymbol("define")
+    ], LispExecuter.prototype, "Define", null);
     LispExecute.LispExecuter = LispExecuter;
 })(LispExecute || (LispExecute = {}));
 //# sourceMappingURL=LispExecuter.js.map

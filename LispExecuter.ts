@@ -2,26 +2,56 @@ namespace LispExecute
 {
     export class LispExecuter extends Executer
     {
-        @SymDecorator.SymbolDef("test",false,null,true,true)
-        public testsymbol()
+        public IsTrue(tb:Table)
         {
-            alert("success!");
-        }
-        //此处约定
-        //非普通js函数语义的 一律不使用提前计算参数和
-        //但是可以使用转化标记
-        protected AddPreSymbols()
-        {
-            let istrue=(tb:Table)=>
-            {
-                //检查计算的结果是否为真
+            //检查计算的结果是否为真
                 //非false则为true   
                 //空表为false
                 if(tb.Type=="normal"&&tb.childs.length==0) return false;
                 if(tb.Type=="object"&&(<LispObject>tb).Object==false) return false;
                 return true;
+        }
+        //工具函数将几个表链接成一个do引导的执行列表
+            public LinkFunc(tabs:Table[])
+            {
+                let ret:Table=new Table();
+                ret.childs=(<Table[]>[new LispSymbolRefence('do')]).concat(tabs);
+                return ret;
             }
-            this.SetSymbol(<SymPair>{key:'+',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            //内部数据结构比较相等
+            //对数据对象为正常js对象比较
+            //对于数据对象（非string和number）会直接比较引用
+            //要比较数据对象相等 使用deq?谓词
+            public TableEqual=(t1:Table,t2:Table)=>
+            {
+                if(t1.Type!=t2.Type) return false;
+                if(t1.Type=="object")
+                {
+                    return (t1 as LispObject).Object==(t2 as LispObject).Object;
+                }
+                if(t1.Type=="symbol")
+                {
+                    return (t1 as LispSymbolRefence).name==(t2 as LispSymbolRefence).name;
+                }
+                if(t1.Type=="normal")
+                {
+                    let cs:Table[]=t1.childs;
+                    let cs2:Table[]=t2.childs;
+                    if(cs.length==cs2.length)
+                    {
+                        for(let i=0;i<cs.length;++i)
+                        {
+                            if(!this.TableEqual(cs[i],cs2[i])) return false;
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            
+            @SymDecorator.RawFunction("+")
+            public Add(...args)
+            {
                 if(typeof args[0]!="number"&&typeof args[0]!="string") throw new Error("错误！运算对象类型错误！");
                 let sum=typeof args[0] =="number"? 0:"";
                 for(let t of args)
@@ -30,9 +60,10 @@ namespace LispExecute
                     sum+=<any>t;
                 }
                 return sum;
-            }});
-            //减法只能用于数字
-            this.SetSymbol(<SymPair>{key:'-',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            }
+            @SymDecorator.RawFunction("-")
+            public Sub(...args)
+            {
                 if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                 let sum=args[0];
                 for(let t of args.slice(1,args.length))
@@ -41,10 +72,12 @@ namespace LispExecute
                     sum-=t;
                 }
                 return sum;
-            }});
-            //乘法可以用于重复语义和数字
-            this.SetSymbol(<SymPair>{key:'*',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
-                   let sum=args[0];
+            }
+
+            @SymDecorator.RawFunction("*")
+            public Mul(...args)
+            {
+                let sum=args[0];
                    //注意 第一个参数为字符串则整体为重复语义 数字则为乘法语义
                    if(typeof sum=="string")
                    {
@@ -69,8 +102,10 @@ namespace LispExecute
                    }
                    else throw new Error("错误！运算对象类型错误！");;
                    return sum;
-               }});
-            this.SetSymbol(<SymPair>{key:'/',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            }
+            @SymDecorator.RawFunction("/")
+            public Div(...args)
+            {
                 if(typeof args[0]!="number") throw new Error("错误！运算对象类型错误！");
                 let sum=args[0];
                 for(let t of args.slice(1,args.length))
@@ -79,9 +114,11 @@ namespace LispExecute
                     sum/=t;
                 }
                 return sum;
-            }});
+            }
             //比较操作部分
-            this.SetSymbol(<SymPair>{key:'>',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            @SymDecorator.RawFunction(">")
+            public CmpA(...args)
+            {
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -89,8 +126,11 @@ namespace LispExecute
                     old=t;
                 }
                 return true;
-            }});
-            this.SetSymbol(<SymPair>{key:'<',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            }
+
+            @SymDecorator.RawFunction("<")
+            public CmpB(...args)
+            {
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -98,8 +138,11 @@ namespace LispExecute
                     old=t;
                 }
                 return true;
-            }});
-            this.SetSymbol(<SymPair>{key:'=',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            }
+
+            @SymDecorator.RawFunction("=")
+            public CmpE(...args)
+            {
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -107,8 +150,11 @@ namespace LispExecute
                     old=t;
                 }
                 return true;
-            }});
-            this.SetSymbol(<SymPair>{key:'>=',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            }
+
+            @SymDecorator.RawFunction(">=")
+            public CmpAE(...args)
+            {
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -116,8 +162,11 @@ namespace LispExecute
                     old=t;
                 }
                 return true;
-            }});
-            this.SetSymbol(<SymPair>{key:'<=',isNeedStore:false,Callthis:null,isNeedCal:true,val:(...args)=>{
+            }
+
+            @SymDecorator.RawFunction("<=")
+            public CmpBE(...args)
+            {
                 let old=args[0];
                 for(let t of args.slice(1,args.length))
                 {
@@ -125,18 +174,12 @@ namespace LispExecute
                     old=t;
                 }
                 return true;
-            }});
-
-
-            //工具函数将几个表链接成一个do引导的执行列表
-            let linkfunc=(tabs:Table[])=>
-            {
-                let ret:Table=new Table();
-                ret.childs=(<Table[]>[new LispSymbolRefence('do')]).concat(tabs);
-                return ret;
             }
+
             //将几个表连接起来
-            this.SetSymbol(<SymPair>{key:'do',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
+            @SymDecorator.TableSymbol("do")
+            public Do(circum:Store,...args)
+            {
                 //此过程对接收的每个参数求值 后返回最后一个求值的结果
                 //此过程用于将多个Table联合在一起作为一个Table求值
                 let ret:Table;
@@ -145,8 +188,11 @@ namespace LispExecute
                     ret=(<Table>a).Calculate(circum);
                 }
                 return ret.Calculate(circum);
-            }});
-            this.SetSymbol(<SymPair>{key:'define',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
+            }
+
+            @SymDecorator.TableSymbol("define")
+            public Define(circum:Store,...args)
+            {
                 //判断定义类型 如果def部分为normal表则为过程定义
                 //否则则为变量定义
                 //注意define操作符不返回值 即返回undefined
@@ -167,7 +213,7 @@ namespace LispExecute
                     let bodylist=args.slice(1,args.length);//得到body序列
 
                     //合成一个body
-                    let body=linkfunc(bodylist);
+                    let body=this.LinkFunc(bodylist);
                     let def=new Table();
                     def.childs[0]=args[0];
                     def.childs[1]=body;
@@ -177,8 +223,14 @@ namespace LispExecute
                     return undefined;
                 }
                 throw new Error("符号定义错误！头部类型不正确");
-
-            }});
+            }
+        
+        //此处约定
+        //非普通js函数语义的 一律不使用提前计算参数和
+        //但是可以使用转化标记
+        protected AddPreSymbols()
+        {
+            
             this.SetSymbol(<SymPair>{key:'if',isNeedStore:true,Callthis:null,isNeedCal:false,isNeedTrans:false,val:(circum:Store,...args)=>{
                 //这里来判断条件
                 if(args.length<2) throw new Error("错误！IF操作参数过少！");
@@ -290,36 +342,7 @@ namespace LispExecute
                 //不返回，如果没有匹配
                 return undefined;
             }});
-            //内部数据结构比较相等
-            //对数据对象为正常js对象比较
-            //对于数据对象（非string和number）会直接比较引用
-            //要比较数据对象相等 使用deq?谓词
-            let iseq=(t1:Table,t2:Table)=>
-            {
-                if(t1.Type!=t2.Type) return false;
-                if(t1.Type=="object")
-                {
-                    return (t1 as LispObject).Object==(t2 as LispObject).Object;
-                }
-                if(t1.Type=="symbol")
-                {
-                    return (t1 as LispSymbolRefence).name==(t2 as LispSymbolRefence).name;
-                }
-                if(t1.Type=="normal")
-                {
-                    let cs:Table[]=t1.childs;
-                    let cs2:Table[]=t2.childs;
-                    if(cs.length==cs2.length)
-                    {
-                        for(let i=0;i<cs.length;++i)
-                        {
-                            if(!iseq(cs[i],cs2[i])) return false;
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            }
+            
             this.SetSymbol(<SymPair>{key:'equal?',isNeedStore:true,Callthis:null,isNeedCal:true,isNeedTrans:false,val:(circum:Store,...args)=>{
                 if(args.length!=2) throw "参数数量错误！";
                 return new LispObject(iseq(args[0],args[1]));
