@@ -586,7 +586,7 @@ namespace LispExecute
                 //但是这样更快
                 //然而这样的话就没有RawCall操作中的某些转换 计算 等特性
                 //使用时需要注意
-                return this.Do(circum,ds);
+                return this.Do.apply(this,[nstore].concat(ds));
             }
             /**
              * 元组赋值 可以是不存在的符号
@@ -631,7 +631,7 @@ namespace LispExecute
                         throw new Error("错误！要赋值的符号不存在");
                     }
                 }
-                this.UseValue(circum,args);
+                this.UseValue.apply(this,[circum].concat(args));
             }
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
