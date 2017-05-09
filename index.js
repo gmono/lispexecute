@@ -1,31 +1,29 @@
 function displayres(str) {
-    let view = document.getElementById("viewport");
+    var view = document.getElementById("viewport");
     view.innerHTML += str + "\n";
 }
-
 function displaycom(str) {
-    let view = document.getElementById("command");
+    var view = document.getElementById("command");
     view.innerHTML += str + "\n";
 }
-let obj = new LispExecute.LispExecuter(window);
+var obj = new LispExecute.LispExecuter(window);
 window.onload = function () {
-    let area = document.getElementById("inputarea");
-
+    var area = document.getElementById("inputarea");
     area.onchange = function (e) {
-        let str = area.value;
+        var str = area.value;
         area.value = "";
         if (str.trim() != "") {
             try {
                 displaycom(str);
-                let table = LispExecute.Parser.Parse(str);
-                let res = obj.Run(table,true);
+                var table = LispExecute.StreamParser.Parse(str);
+                var res = obj.Run(table, true);
                 displayres("> " + res);
-            } catch (e) {
+            }
+            catch (e) {
                 displayres(e);
                 throw e;
             }
-
         }
-
-    }
-}
+    };
+};
+//# sourceMappingURL=index.js.map

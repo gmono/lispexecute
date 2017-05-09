@@ -484,7 +484,7 @@ var LispExecute;
             var temp = args[0].Calculate(circum);
             if (temp.Type == "object") {
                 //数据对象进行取属性计算
-                var obj = temp.Object;
+                var obj_1 = temp.Object;
                 var pname = args[1];
                 pname = pname.Calculate(circum);
                 var name_1;
@@ -493,8 +493,8 @@ var LispExecute;
                 }
                 else
                     throw new Error("错误！属性名必须为字符串或符号引用");
-                if (name_1 in obj) {
-                    return new LispExecute.LispObject(obj[name_1]);
+                if (name_1 in obj_1) {
+                    return new LispExecute.LispObject(obj_1[name_1]);
                 }
                 //调试用
                 throw new Error("\u9519\u8BEF\uFF01\u6307\u5B9A\u5BF9\u8C61\u4E2D\u4E0D\u5B58\u5728\u5C5E\u6027\uFF1A" + name_1);

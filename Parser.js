@@ -111,8 +111,8 @@ var LispExecute;
                     //这里逻辑为 如果在读取状态遇到空格意味着读取结束 
                     //否则直接跳过
                     if (isinread) {
-                        var obj = this.ReadValue(nowval);
-                        container.childs.push(obj);
+                        var obj_1 = this.ReadValue(nowval);
+                        container.childs.push(obj_1);
                         nowval = "";
                         isinread = false;
                     }
@@ -146,8 +146,8 @@ var LispExecute;
                         //这里逻辑为 如果在读取状态遇到空格意味着读取结束 
                         //否则直接跳过
                         if (isinread) {
-                            var obj = this.ReadValue(nowval);
-                            container.childs.push(obj);
+                            var obj_2 = this.ReadValue(nowval);
+                            container.childs.push(obj_2);
                             nowval = "";
                             isinread = false;
                         }
@@ -156,8 +156,8 @@ var LispExecute;
                     //如果遇到表结束
                     //并且此时并没有读取完值
                     if (isinread) {
-                        var obj = this.ReadValue(nowval);
-                        container.childs.push(obj);
+                        var obj_3 = this.ReadValue(nowval);
+                        container.childs.push(obj_3);
                     }
                     //统一 出循环后应指向读到的最后一个字符后面
                     ptr++;
