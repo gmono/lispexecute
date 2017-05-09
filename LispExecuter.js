@@ -668,9 +668,6 @@ var LispExecute;
             //后面的是程序序列 返回最后一次执行的结果
             var deftable = args[0];
             var ds = args.slice(1, args.length);
-            var dotable = new LispExecute.Table();
-            dotable.childs.push(new LispExecute.LispSymbolRefence("do"));
-            dotable.childs = dotable.childs.concat(ds);
             //执行表构造完成 处理定义表
             //构建新层
             var nstore = new LispExecute.Store(circum);
@@ -688,7 +685,59 @@ var LispExecute;
                 nstore.Set(sym.name, val);
             }
             //执行计算
-            return dotable.Calculate(nstore);
+            //这里本来可以通过构造一个table来通过核心引擎执行do操作的
+            //但是这样更快
+            //然而这样的话就没有RawCall操作中的某些转换 计算 等特性
+            //使用时需要注意
+            return this.Do(circum, ds);
+        };
+        /**
+         * 元组赋值 可以是不存在的符号
+         */
+        LispExecuter.prototype.UseValue = function (circum) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            if (args.length != 2)
+                throw new Error("错误！元组赋值只允许两个参数");
+            var deft = args[0];
+            var valt = args[1];
+            if (deft.childs.length != valt.childs.length) {
+                throw new Error("错误！元组赋值数量不对等");
+            }
+            //赋值
+            for (var i = 0; i < deft.childs.length; ++i) {
+                var sym = deft.childs[i];
+                if (sym.Type != "symbol")
+                    throw new Error("错误！元组赋值中第一个表必须为纯符号表");
+                var val = valt.childs[i].Calculate(circum);
+                circum.Set(sym.name, val);
+            }
+        };
+        /**
+         * 元组赋值 必须是存在的符号
+         */
+        LispExecuter.prototype.SetValue = function (circum) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            if (args.length != 2)
+                throw new Error("错误！元组赋值只允许两个参数");
+            var deft = args[0];
+            var valt = args[1];
+            if (deft.childs.length != valt.childs.length) {
+                throw new Error("错误！元组赋值数量不对等");
+            }
+            for (var _a = 0, _b = deft.childs; _a < _b.length; _a++) {
+                var t = _b[_a];
+                if (t.Type != "symbol" || circum.TrySearch(t.name) == undefined) {
+                    //如果不是符号或者符号并不存在 
+                    throw new Error("错误！要赋值的符号不存在");
+                }
+            }
+            this.UseValue(circum, args);
         };
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
@@ -815,6 +864,12 @@ var LispExecute;
     __decorate([
         LispExecute.SymDecorator.TableSymbol("let")
     ], LispExecuter.prototype, "Let", null);
+    __decorate([
+        LispExecute.SymDecorator.TableSymbol("use")
+    ], LispExecuter.prototype, "UseValue", null);
+    __decorate([
+        LispExecute.SymDecorator.TableSymbol("set")
+    ], LispExecuter.prototype, "SetValue", null);
     LispExecute.LispExecuter = LispExecuter;
 })(LispExecute || (LispExecute = {}));
 //# sourceMappingURL=LispExecuter.js.map

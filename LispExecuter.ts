@@ -564,9 +564,6 @@ namespace LispExecute
                 //后面的是程序序列 返回最后一次执行的结果
                 let deftable:Table=args[0];
                 let ds=args.slice(1,args.length);
-                let dotable:Table=new Table();
-                dotable.childs.push(new LispSymbolRefence("do"));
-                dotable.childs=dotable.childs.concat(ds);
                 //执行表构造完成 处理定义表
                 //构建新层
                 let nstore=new Store(circum);
@@ -585,7 +582,56 @@ namespace LispExecute
                     nstore.Set(sym.name,val);
                 }
                 //执行计算
-                return dotable.Calculate(nstore);
+                //这里本来可以通过构造一个table来通过核心引擎执行do操作的
+                //但是这样更快
+                //然而这样的话就没有RawCall操作中的某些转换 计算 等特性
+                //使用时需要注意
+                return this.Do(circum,ds);
+            }
+            /**
+             * 元组赋值 可以是不存在的符号
+             */
+            @SymDecorator.TableSymbol("use")
+            public UseValue(circum:Store,...args)
+            {
+                if(args.length!=2) throw new Error("错误！元组赋值只允许两个参数");
+                let deft:Table=args[0];
+                let valt:Table=args[1];
+                if(deft.childs.length!=valt.childs.length)
+                {
+                    throw new Error("错误！元组赋值数量不对等");
+                }
+                //赋值
+                for(let i=0;i<deft.childs.length;++i)
+                {
+                    let sym=deft.childs[i] as LispSymbolRefence;
+                    if(sym.Type!="symbol") throw new Error("错误！元组赋值中第一个表必须为纯符号表");
+                    let val=valt.childs[i].Calculate(circum);
+                    circum.Set(sym.name,val);
+                }
+            }
+            /**
+             * 元组赋值 必须是存在的符号
+             */
+            @SymDecorator.TableSymbol("set")
+            public SetValue(circum:Store,...args)
+            {
+                if(args.length!=2) throw new Error("错误！元组赋值只允许两个参数");
+                let deft:Table=args[0];
+                let valt:Table=args[1];
+                if(deft.childs.length!=valt.childs.length)
+                {
+                    throw new Error("错误！元组赋值数量不对等");
+                }
+                for(let t of deft.childs)
+                {
+                    if(t.Type!="symbol"||circum.TrySearch((t as LispSymbolRefence).name)==undefined)
+                    {
+                        //如果不是符号或者符号并不存在 
+                        throw new Error("错误！要赋值的符号不存在");
+                    }
+                }
+                this.UseValue(circum,args);
             }
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
