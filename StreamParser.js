@@ -19,16 +19,35 @@ var LispExecute;
             var callarr = code.split("->");
             //初始表
             var oldtable = null;
+            var isx = false;
             //前一个表会被附加到后一个表的后面
             for (var _i = 0, callarr_1 = callarr; _i < callarr_1.length; _i++) {
                 var t = callarr_1[_i];
                 //构造层次计算表
                 //得到当前表
-                var now = _super.Parse.call(this, t);
+                //处理解耦合语法 *()
+                var now = null;
+                var nisx = false;
+                if (t.trim()[0] == "*") {
+                    now = _super.Parse.call(this, t.slice(1, t.length));
+                    if (now.Type != "normal") {
+                        throw new Error("解析错误！只能对normal型表执行解耦合操作");
+                    }
+                    nisx = true;
+                }
+                else {
+                    now = _super.Parse.call(this, t);
+                    nisx = false;
+                }
                 if (oldtable != null) {
-                    now.childs.push(oldtable);
+                    if (!isx)
+                        now.childs.push(oldtable);
+                    else {
+                        now.childs = now.childs.concat(oldtable.childs);
+                    }
                 }
                 oldtable = now;
+                isx = nisx;
             }
             return oldtable;
         };
