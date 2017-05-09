@@ -500,6 +500,9 @@ var LispExecute;
                 throw new Error("\u9519\u8BEF\uFF01\u6307\u5B9A\u5BF9\u8C61\u4E2D\u4E0D\u5B58\u5728\u5C5E\u6027\uFF1A" + name_1);
             }
         };
+        /**
+         * 将一个function型 的object转换为一个RawProcess对象
+         */
         LispExecuter.prototype.AsProc = function (circum) {
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -512,6 +515,9 @@ var LispExecute;
                 return new LispExecute.LispRawProcess("", temp.Object, false);
             }
         };
+        /**
+         * 得到一个符号的名字（字符串)
+         */
         LispExecuter.prototype.GetSymName = function (circum) {
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -739,6 +745,41 @@ var LispExecute;
             }
             this.UseValue.apply(this, [circum].concat(args));
         };
+        /**
+         * 主动计算一个表（允许多个)
+         */
+        LispExecuter.prototype.Cal = function (circum) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            if (args.length < 1)
+                throw new Error("错误！参数过少");
+            var ret = undefined;
+            for (var _a = 0, _b = args; _a < _b.length; _a++) {
+                var t = _b[_a];
+                ret = t.Calculate(circum);
+            }
+            return ret;
+        };
+        /**
+         * 此符号接受一个字符串
+         * 转换为symbol refence后返回
+         */
+        LispExecuter.prototype.AsSymbol = function (circum) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            if (args.length != 1)
+                throw new Error("参数数量错误!");
+            var str = args[0];
+            if (str.Type != "object")
+                throw new Error("错误！只能对数据对象(可字符串化)执行assym操作");
+            //原则上不限制类型 只要可以做字符串用就行
+            //不过考虑可以限制类型
+            return new LispExecute.LispSymbolRefence(str.Object);
+        };
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
         //但是可以使用转化标记
@@ -870,6 +911,12 @@ var LispExecute;
     __decorate([
         LispExecute.SymDecorator.TableSymbol("set")
     ], LispExecuter.prototype, "SetValue", null);
+    __decorate([
+        LispExecute.SymDecorator.InnerFunc("cal")
+    ], LispExecuter.prototype, "Cal", null);
+    __decorate([
+        LispExecute.SymDecorator.InnerFunc("assym")
+    ], LispExecuter.prototype, "AsSymbol", null);
     LispExecute.LispExecuter = LispExecuter;
 })(LispExecute || (LispExecute = {}));
 //# sourceMappingURL=LispExecuter.js.map

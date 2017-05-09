@@ -25,7 +25,7 @@ namespace LispExecute
                     now=super.Parse(t.slice(1,t.length));
                     if(now.Type!="normal")
                     {
-                        throw new Error("解析错误！只能对normal型表执行解耦合操作";)
+                        throw new Error("解析错误！只能对normal型表执行解耦合操作");
                     }
                     nisx=true;
                 }

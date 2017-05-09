@@ -437,7 +437,9 @@ namespace LispExecute
                     throw new Error(`错误！指定对象中不存在属性：${name}`);
                 }
             }
-
+            /**
+             * 将一个function型 的object转换为一个RawProcess对象
+             */
             @SymDecorator.TableSymbol("proc")
             public AsProc(circum:Store,...args)
             {
@@ -448,7 +450,9 @@ namespace LispExecute
                     return new LispRawProcess("",(<LispObject>temp).Object,false);
                 }
             }
-
+            /**
+             * 得到一个符号的名字（字符串)
+             */
             @SymDecorator.TableSymbol("symname")
             public GetSymName(circum:Store,...args)
             {
@@ -632,6 +636,35 @@ namespace LispExecute
                     }
                 }
                 this.UseValue.apply(this,[circum].concat(args));
+            }
+            /**
+             * 主动计算一个表（允许多个)
+             */
+            @SymDecorator.InnerFunc("cal")
+            public Cal(circum:Store,...args)
+            {
+                if(args.length<1) throw new Error("错误！参数过少");
+                let ret=undefined;
+                for(let t of (args as Table[]))
+                {
+                    ret=t.Calculate(circum);
+                }
+                return ret;
+            }
+            /**
+             * 此符号接受一个字符串
+             * 转换为symbol refence后返回
+             */
+            @SymDecorator.InnerFunc("assym")
+            public AsSymbol(circum:Store,...args)
+            {
+                if(args.length!=1) throw new Error("参数数量错误!");
+                let str=args[0] as Table;
+                if(str.Type!="object")
+                    throw new Error("错误！只能对数据对象(可字符串化)执行assym操作");
+                //原则上不限制类型 只要可以做字符串用就行
+                //不过考虑可以限制类型
+                return new LispSymbolRefence((str as LispObject).Object);
             }
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
