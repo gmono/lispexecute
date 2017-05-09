@@ -84,6 +84,7 @@ namespace LispExecute
                 return func(target,propertyKey,descriptor);
             }
         }
+        
     }
     export class LinkContainer extends Store
     {
