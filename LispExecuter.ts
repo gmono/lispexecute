@@ -556,6 +556,37 @@ namespace LispExecute
                 ret=temp.Value;
                 return ret;
             }
+            //批量定义局部变量 并在此中计算
+            @SymDecorator.TableSymbol("let")
+            public Let(circum:Store,...args)
+            {
+                //let有多个参数第一个是一个嵌套表 声明局部变量
+                //后面的是程序序列 返回最后一次执行的结果
+                let deftable:Table=args[0];
+                let ds=args.slice(1,args.length);
+                let dotable:Table=new Table();
+                dotable.childs.push(new LispSymbolRefence("do"));
+                dotable.childs=dotable.childs.concat(ds);
+                //执行表构造完成 处理定义表
+                //构建新层
+                let nstore=new Store(circum);
+                //加入局部变量
+                for(let pair of deftable.childs)
+                {
+                    if(pair.childs.length!=2||pair.childs[0].Type!="symbol")
+                        throw new Error("错误！定义序列元素中第一项应为符号");
+                    let sym:LispSymbolRefence=pair.childs[0] as LispSymbolRefence;
+                    //这里也考虑不检测 不过感觉不太正常 如果一个定义表中有多个同样符号的定义的话
+                    if(nstore.SelfHas(sym.name))
+                    {
+                        throw new Error("错误！局部变量重复定义");
+                    }
+                    let val=pair.childs[1].Calculate(nstore);
+                    nstore.Set(sym.name,val);
+                }
+                //执行计算
+                return dotable.Calculate(nstore);
+            }
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
         //但是可以使用转化标记

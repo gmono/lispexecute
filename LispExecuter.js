@@ -658,6 +658,38 @@ var LispExecute;
             ret = temp.Value;
             return ret;
         };
+        //批量定义局部变量 并在此中计算
+        LispExecuter.prototype.Let = function (circum) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            //let有多个参数第一个是一个嵌套表 声明局部变量
+            //后面的是程序序列 返回最后一次执行的结果
+            var deftable = args[0];
+            var ds = args.slice(1, args.length);
+            var dotable = new LispExecute.Table();
+            dotable.childs.push(new LispExecute.LispSymbolRefence("do"));
+            dotable.childs = dotable.childs.concat(ds);
+            //执行表构造完成 处理定义表
+            //构建新层
+            var nstore = new LispExecute.Store(circum);
+            //加入局部变量
+            for (var _a = 0, _b = deftable.childs; _a < _b.length; _a++) {
+                var pair = _b[_a];
+                if (pair.childs.length != 2 || pair.childs[0].Type != "symbol")
+                    throw new Error("错误！定义序列元素中第一项应为符号");
+                var sym = pair.childs[0];
+                //这里也考虑不检测 不过感觉不太正常 如果一个定义表中有多个同样符号的定义的话
+                if (nstore.SelfHas(sym.name)) {
+                    throw new Error("错误！局部变量重复定义");
+                }
+                var val = pair.childs[1].Calculate(nstore);
+                nstore.Set(sym.name, val);
+            }
+            //执行计算
+            return dotable.Calculate(nstore);
+        };
         //此处约定
         //非普通js函数语义的 一律不使用提前计算参数和
         //但是可以使用转化标记
@@ -780,6 +812,9 @@ var LispExecute;
     __decorate([
         LispExecute.SymDecorator.RawFunction("ror")
     ], LispExecuter.prototype, "ROR", null);
+    __decorate([
+        LispExecute.SymDecorator.TableSymbol("let")
+    ], LispExecuter.prototype, "Let", null);
     LispExecute.LispExecuter = LispExecuter;
 })(LispExecute || (LispExecute = {}));
 //# sourceMappingURL=LispExecuter.js.map

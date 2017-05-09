@@ -42,6 +42,7 @@ namespace LispExecute {
         }
         /**
          * 设置一个符号 不允许覆盖
+         * 成功返回true 失败返回false
          * @param name 符号名
          * @param value 新值
          */
@@ -50,7 +51,17 @@ namespace LispExecute {
             if(this.TrySearch(name)==undefined)
             {
                 this.Set(name,value);
+                return true;
             }
+            return false;
+        }
+        /**
+         * 测试自身是否拥有某个符号定义
+         */
+        public SelfHas(name:string)
+        {
+            if(this.selfmap.has(name)) return true;
+            return false;
         }
         /**
          * Delete一个符号
