@@ -1,13 +1,14 @@
 {
     "compilerOptions": {
-        "module": "amd",
-        "target": "es5",
+        "module": "commonjs",
+        "target": "esnext",
         "noImplicitAny": false,
         "sourceMap": true,
         "experimentalDecorators": true,
         "lib": [
             "es2015",
             "dom"
-        ]
+        ],
+        "isolatedModules": true
     }
 }

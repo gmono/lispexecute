@@ -1,3 +1,6 @@
+import { MediaControlExecuter } from "./MediaControlExecuter";
+import { StreamParser } from "./StreamParser";
+
 function displayres(str) {
     let view = document.getElementById("viewport");
     view.innerHTML += str + "\n";
@@ -7,7 +10,7 @@ function displaycom(str) {
     let view = document.getElementById("command");
     view.innerHTML += str + "\n";
 }
-let obj = new LispExecute.MediaControlExecuter(window);
+let obj = new MediaControlExecuter(window);
 window.onload = function () {
     let area = document.getElementById("inputarea") as HTMLTextAreaElement;
 
@@ -17,7 +20,7 @@ window.onload = function () {
         if (str.trim() != "") {
             try {
                 displaycom(str);
-                let table = LispExecute.StreamParser.Parse(str);
+                let table = StreamParser.Parse(str);
                 let res = obj.Run(table,true);
                 displayres("> " + res);
             } catch (e) {
