@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../lispexecuter-ui/lispexecuter-ui"
+		}
+	],
+	"settings": {
+		"volar.tsPlugin": true
+	}
+}

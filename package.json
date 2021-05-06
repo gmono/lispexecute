@@ -1,0 +1,16 @@
+{
+  "name": "lispexecute",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/gmono/lispexecute.git",
+  "author": "gmono <gaozijian0411@foxmail.com>",
+  "license": "LGPL-3",
+  "dependencies": {
+    "ts-metacode": "^1.4.6-maintain4",
+    "ts-pystyle": "^1.4.4",
+    "vite": "^2.2.4"
+  },
+  "scripts":{
+    "dev":"vite"
+  }
+}
