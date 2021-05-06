@@ -7,7 +7,7 @@ function displaycom(str) {
     let view = document.getElementById("command");
     view.innerHTML += str + "\n";
 }
-let obj = new LispExecute.LispExecuter(window);
+let obj = new LispExecute.MediaControlExecuter(window);
 window.onload = function () {
     let area = document.getElementById("inputarea") as HTMLTextAreaElement;
 

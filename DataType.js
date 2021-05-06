@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -15,7 +18,7 @@ var LispExecute;
      * 一般来说 子类只需要重写TrySearch方法和 TrySet方法即可即可
      * TrySearch中进行具体操作 TrySet中进行存在检测
      */
-    var Store = (function () {
+    var Store = /** @class */ (function () {
         function Store(supercir) {
             if (supercir === void 0) { supercir = null; }
             this.supercir = supercir;
@@ -94,7 +97,7 @@ var LispExecute;
      * 自然的 并不是每个表都确定一个环境，仅在Process调用时会创建一层新环境
      * 表作为计算式计算时是由外部提供搜索符号的接口而非自己创建一个环境
      */
-    var Table = (function () {
+    var Table = /** @class */ (function () {
         function Table() {
             //childs默认为空 即此表为空表 所有特殊表都为空表
             this.childs = [];
@@ -109,7 +112,7 @@ var LispExecute;
             get: function () {
                 return this.type;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         /**
@@ -151,7 +154,7 @@ var LispExecute;
      * 注意存在特殊值：undefined与空表不同 也算作object的一部分
      * 因此LispObject实际代表了除了DataType内部类型和function外的所有外部类型
      */
-    var LispObject = (function (_super) {
+    var LispObject = /** @class */ (function (_super) {
         __extends(LispObject, _super);
         function LispObject(value) {
             var _this = _super.call(this) || this;
@@ -172,7 +175,7 @@ var LispExecute;
      * 此处可以在Calculate函数中进行特殊处理
      * 这样来将一个符号关联到某个js对象的成员集合中
      */
-    var LispSymbolRefence = (function (_super) {
+    var LispSymbolRefence = /** @class */ (function (_super) {
         __extends(LispSymbolRefence, _super);
         function LispSymbolRefence(name) {
             var _this = _super.call(this) || this;
@@ -193,7 +196,7 @@ var LispExecute;
         return LispSymbolRefence;
     }(Table));
     LispExecute.LispSymbolRefence = LispSymbolRefence;
-    var LispProcess = (function (_super) {
+    var LispProcess = /** @class */ (function (_super) {
         __extends(LispProcess, _super);
         function LispProcess() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -204,7 +207,7 @@ var LispExecute;
     /**
      * 定义过程 过程的表结构为((name par1 par2.....)(body))
      */
-    var LispDefProcess = (function (_super) {
+    var LispDefProcess = /** @class */ (function (_super) {
         __extends(LispDefProcess, _super);
         function LispDefProcess(def) {
             var _this = _super.call(this) || this;
@@ -230,7 +233,7 @@ var LispExecute;
             get: function () {
                 return this.self.childs[0];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LispDefProcess.prototype, "ParsTable", {
@@ -242,7 +245,7 @@ var LispExecute;
                 res.childs = ret;
                 return res;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LispDefProcess.prototype, "Name", {
@@ -252,21 +255,21 @@ var LispExecute;
                 var t = this.self.childs[0].childs[0];
                 return t.name;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LispDefProcess.prototype, "ParsCount", {
             get: function () {
                 return this.self.childs[0].childs.length - 1;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(LispDefProcess.prototype, "Body", {
             get: function () {
                 return this.self.childs[1];
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         LispDefProcess.prototype.Calculte = function (circum) {
@@ -305,7 +308,7 @@ var LispExecute;
      * 这个链接层 不是每个原生过程都需要
      * 因此这里的trysearch和set都直接链接
      */
-    var RawCircum = (function (_super) {
+    var RawCircum = /** @class */ (function (_super) {
         __extends(RawCircum, _super);
         function RawCircum(circum, rfuncbody) {
             var _this = _super.call(this, circum) || this;
@@ -332,7 +335,7 @@ var LispExecute;
      * 此类接收一个函数 并代表这个函数
      * 一般来说只有对函数进行简单封装时才使用这个类
      */
-    var LispRawProcess = (function (_super) {
+    var LispRawProcess = /** @class */ (function (_super) {
         __extends(LispRawProcess, _super);
         /**
          *

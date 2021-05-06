@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -11,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 var LispExecute;
 (function (LispExecute) {
     //符号装饰器集合
-    var SymDecorator = (function () {
+    var SymDecorator = /** @class */ (function () {
         function SymDecorator() {
         }
         SymDecorator.SymbolDef = function (name, NeedStore, thisobj, NeedCalPars, NeedTransObject) {
@@ -83,7 +86,7 @@ var LispExecute;
         return SymDecorator;
     }());
     LispExecute.SymDecorator = SymDecorator;
-    var LinkContainer = (function (_super) {
+    var LinkContainer = /** @class */ (function (_super) {
         __extends(LinkContainer, _super);
         function LinkContainer(LinkObject) {
             if (LinkObject === void 0) { LinkObject = null; }
@@ -124,7 +127,7 @@ var LispExecute;
     /**
      * 提供顶层环境和外部接口
      */
-    var Executer = (function () {
+    var Executer = /** @class */ (function () {
         function Executer(link, initstate) {
             if (link === void 0) { link = null; }
             //先加入预定义符号 加减乘除等

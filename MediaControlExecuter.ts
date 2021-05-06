@@ -8,7 +8,18 @@ namespace LispExecute{
      */
     @SymDecorator.TableSymbol("media")
     public Video(cir: Store, ...args) {
-      
+      let [type, url] = args as Table[];
+      if (type.Type == "symbol") {
+        let t = type as LispSymbolRefence;
+        let u= url as LispObject;
+        if (t.name == "video") {
+          //测试
+          let s = u.Object as string;
+          alert("type:video " + "url:" + s);
+        }
+      } else {
+        
+      }
     }
   }
 }

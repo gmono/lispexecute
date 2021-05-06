@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -17,7 +20,7 @@ var LispExecute;
          * limit为长度 位index从0->limit-1
          * 这个类提供静态函数对number进行linmitnumber操作
          */
-        var LimitNumber = (function () {
+        var LimitNumber = /** @class */ (function () {
             /**
              * 初始化
              * @param limit 数据长度
@@ -110,20 +113,20 @@ var LispExecute;
                     this.num = num;
                     this.num &= 0xffffffff << (32 - this.limit); //取低limit位
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(LimitNumber.prototype, "ReadOnly", {
                 get: function () {
                     return this.isreadonly;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             return LimitNumber;
         }());
         LimitNumber_1.LimitNumber = LimitNumber;
-        var Byte = (function (_super) {
+        var Byte = /** @class */ (function (_super) {
             __extends(Byte, _super);
             function Byte(isreadonly, num) {
                 return _super.call(this, 8, isreadonly, num) || this;
@@ -131,7 +134,7 @@ var LispExecute;
             return Byte;
         }(LimitNumber));
         LimitNumber_1.Byte = Byte;
-        var Word = (function (_super) {
+        var Word = /** @class */ (function (_super) {
             __extends(Word, _super);
             function Word(isreadonly, num) {
                 return _super.call(this, 16, isreadonly, num) || this;
@@ -146,7 +149,7 @@ var LispExecute;
             return Word;
         }(LimitNumber));
         LimitNumber_1.Word = Word;
-        var DWord = (function (_super) {
+        var DWord = /** @class */ (function (_super) {
             __extends(DWord, _super);
             function DWord(isreadonly, num) {
                 return _super.call(this, 32, isreadonly, num) || this;

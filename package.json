@@ -1,0 +1,8 @@
+{
+  "name": "lispexecute",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/gmono/lispexecute.git",
+  "author": "gmono <gaozijian0411@foxmail.com>",
+  "license": "LGPL-3"
+}

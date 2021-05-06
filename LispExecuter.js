@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -16,7 +19,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var LispExecute;
 (function (LispExecute) {
-    var LispExecuter = (function (_super) {
+    var LispExecuter = /** @class */ (function (_super) {
         __extends(LispExecuter, _super);
         function LispExecuter() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -792,131 +795,131 @@ var LispExecute;
             this.SetOtherName("do", "begin");
             this.SetOtherName("eqv?", "eq?");
         };
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("+")
+        ], LispExecuter.prototype, "Add", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("-")
+        ], LispExecuter.prototype, "Sub", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("*")
+        ], LispExecuter.prototype, "Mul", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("/")
+        ], LispExecuter.prototype, "Div", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction(">")
+        ], LispExecuter.prototype, "CmpA", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("<")
+        ], LispExecuter.prototype, "CmpB", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("=")
+        ], LispExecuter.prototype, "CmpE", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction(">=")
+        ], LispExecuter.prototype, "CmpAE", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("<=")
+        ], LispExecuter.prototype, "CmpBE", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("do")
+        ], LispExecuter.prototype, "Do", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("define")
+        ], LispExecuter.prototype, "Define", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("if")
+        ], LispExecuter.prototype, "If", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("typeof")
+        ], LispExecuter.prototype, "STypeof", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("objtype")
+        ], LispExecuter.prototype, "GetObjType", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("quote")
+        ], LispExecuter.prototype, "Quote", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("car")
+        ], LispExecuter.prototype, "CAR", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("cdr")
+        ], LispExecuter.prototype, "CDR", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("cons")
+        ], LispExecuter.prototype, "Cons", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("cond")
+        ], LispExecuter.prototype, "Cond", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("lambda")
+        ], LispExecuter.prototype, "Lambda", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("equal?")
+        ], LispExecuter.prototype, "isEqual", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("eq?")
+        ], LispExecuter.prototype, "isEq", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("atom")
+        ], LispExecuter.prototype, "Atom", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("prop")
+        ], LispExecuter.prototype, "GetProp", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("proc")
+        ], LispExecuter.prototype, "AsProc", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("symname")
+        ], LispExecuter.prototype, "GetSymName", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("and")
+        ], LispExecuter.prototype, "AND", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("or")
+        ], LispExecuter.prototype, "OR", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("not")
+        ], LispExecuter.prototype, "NOT", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("~")
+        ], LispExecuter.prototype, "BITNOT", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("&")
+        ], LispExecuter.prototype, "BITAND", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("|")
+        ], LispExecuter.prototype, "BITOR", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("<<")
+        ], LispExecuter.prototype, "SHL", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction(">>")
+        ], LispExecuter.prototype, "SHR", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("rol")
+        ], LispExecuter.prototype, "ROL", null);
+        __decorate([
+            LispExecute.SymDecorator.RawFunction("ror")
+        ], LispExecuter.prototype, "ROR", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("let")
+        ], LispExecuter.prototype, "Let", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("use")
+        ], LispExecuter.prototype, "UseValue", null);
+        __decorate([
+            LispExecute.SymDecorator.TableSymbol("set")
+        ], LispExecuter.prototype, "SetValue", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("cal")
+        ], LispExecuter.prototype, "Cal", null);
+        __decorate([
+            LispExecute.SymDecorator.InnerFunc("assym")
+        ], LispExecuter.prototype, "AsSymbol", null);
         return LispExecuter;
     }(LispExecute.Executer));
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("+")
-    ], LispExecuter.prototype, "Add", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("-")
-    ], LispExecuter.prototype, "Sub", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("*")
-    ], LispExecuter.prototype, "Mul", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("/")
-    ], LispExecuter.prototype, "Div", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction(">")
-    ], LispExecuter.prototype, "CmpA", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("<")
-    ], LispExecuter.prototype, "CmpB", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("=")
-    ], LispExecuter.prototype, "CmpE", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction(">=")
-    ], LispExecuter.prototype, "CmpAE", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("<=")
-    ], LispExecuter.prototype, "CmpBE", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("do")
-    ], LispExecuter.prototype, "Do", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("define")
-    ], LispExecuter.prototype, "Define", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("if")
-    ], LispExecuter.prototype, "If", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("typeof")
-    ], LispExecuter.prototype, "STypeof", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("objtype")
-    ], LispExecuter.prototype, "GetObjType", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("quote")
-    ], LispExecuter.prototype, "Quote", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("car")
-    ], LispExecuter.prototype, "CAR", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("cdr")
-    ], LispExecuter.prototype, "CDR", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("cons")
-    ], LispExecuter.prototype, "Cons", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("cond")
-    ], LispExecuter.prototype, "Cond", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("lambda")
-    ], LispExecuter.prototype, "Lambda", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("equal?")
-    ], LispExecuter.prototype, "isEqual", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("eq?")
-    ], LispExecuter.prototype, "isEq", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("atom")
-    ], LispExecuter.prototype, "Atom", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("prop")
-    ], LispExecuter.prototype, "GetProp", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("proc")
-    ], LispExecuter.prototype, "AsProc", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("symname")
-    ], LispExecuter.prototype, "GetSymName", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("and")
-    ], LispExecuter.prototype, "AND", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("or")
-    ], LispExecuter.prototype, "OR", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("not")
-    ], LispExecuter.prototype, "NOT", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("~")
-    ], LispExecuter.prototype, "BITNOT", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("&")
-    ], LispExecuter.prototype, "BITAND", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("|")
-    ], LispExecuter.prototype, "BITOR", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("<<")
-    ], LispExecuter.prototype, "SHL", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction(">>")
-    ], LispExecuter.prototype, "SHR", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("rol")
-    ], LispExecuter.prototype, "ROL", null);
-    __decorate([
-        LispExecute.SymDecorator.RawFunction("ror")
-    ], LispExecuter.prototype, "ROR", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("let")
-    ], LispExecuter.prototype, "Let", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("use")
-    ], LispExecuter.prototype, "UseValue", null);
-    __decorate([
-        LispExecute.SymDecorator.TableSymbol("set")
-    ], LispExecuter.prototype, "SetValue", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("cal")
-    ], LispExecuter.prototype, "Cal", null);
-    __decorate([
-        LispExecute.SymDecorator.InnerFunc("assym")
-    ], LispExecuter.prototype, "AsSymbol", null);
     LispExecute.LispExecuter = LispExecuter;
 })(LispExecute || (LispExecute = {}));
 //# sourceMappingURL=LispExecuter.js.map
