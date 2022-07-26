@@ -7,7 +7,7 @@ import { LispExecuter } from "./LispExecuter";
  */
 export class MediaControlExecuter extends LispExecuter {
   /**
-   * 定义一个资源 参数为 ： url（http file） type
+   * 定义一个资源 参数为 ：  type url（http file） 测试代码 (media video "http://xxxx")
    * @param cir 环境
    * @param args 参数
    */

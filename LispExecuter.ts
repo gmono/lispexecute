@@ -484,7 +484,13 @@ export class LispExecuter extends Executer {
         ret = temp.Value;
         return ret;
     }
-    //批量定义局部变量 并在此中计算
+    /**
+     * 批量定义局部变量 并在此中计算
+     * 例子(let ((a 1) (b 2)) (+ a b))
+     * @param circum
+     * @param args
+     * @constructor
+     */
     @SymDecorator.TableSymbol("let")
     public Let(circum: Store, ...args) {
         //let有多个参数第一个是一个嵌套表 声明局部变量

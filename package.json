@@ -10,7 +10,7 @@
     "ts-pystyle": "^1.4.4",
     "vite": "^2.2.4"
   },
-  "scripts":{
-    "dev":"vite"
+  "scripts": {
+    "dev": "vite"
   }
 }
